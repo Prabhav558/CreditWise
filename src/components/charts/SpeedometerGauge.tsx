@@ -46,7 +46,7 @@ export const SpeedometerGauge = ({
 
   return (
     <div className="flex flex-col items-center space-y-4">
-      <div className="relative" style={{ width: size, height: size * 0.65 }}>
+      <div className="relative" style={{ width: size, height: size * 0.65, transform: 'rotate(-90deg)' }}>
         <svg 
           width={size} 
           height={size * 0.65} 
