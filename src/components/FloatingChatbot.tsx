@@ -93,7 +93,7 @@ export default function FloatingChatbot() {
           className="fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 bg-background border-2 border-border z-50 p-0"
           size="icon"
         >
-          <Bot className="w-10 h-10 text-foreground" />
+          <Bot className="w-12 h-12 text-foreground" />
         </Button>
       )}
 
