@@ -22,6 +22,7 @@ export type Database = {
           embedding: string
           id: number
           meta: Json | null
+          user_id: string | null
         }
         Insert: {
           content: string
@@ -30,6 +31,7 @@ export type Database = {
           embedding: string
           id?: number
           meta?: Json | null
+          user_id?: string | null
         }
         Update: {
           content?: string
@@ -38,6 +40,7 @@ export type Database = {
           embedding?: string
           id?: number
           meta?: Json | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -55,18 +58,42 @@ export type Database = {
           id: string
           source: string | null
           title: string | null
+          user_id: string | null
         }
         Insert: {
           created_at?: string | null
           id?: string
           source?: string | null
           title?: string | null
+          user_id?: string | null
         }
         Update: {
           created_at?: string | null
           id?: string
           source?: string | null
           title?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
