@@ -326,7 +326,8 @@ const SyntheticData = () => {
         </div>
 
         {/* Table Container with scrolling */}
-        <div className="border rounded-lg bg-background w-full h-96 overflow-auto whitespace-nowrap">
+        <div className="border rounded-lg bg-background w-full h-96 overflow-x-auto overflow-y-hidden">
+          <div className="h-full overflow-y-auto">
           <table className="border-collapse text-sm min-w-max">
             {/* Header */}
             <thead className="bg-muted/50 sticky top-0 z-10">
@@ -375,6 +376,7 @@ const SyntheticData = () => {
               ))}
             </tbody>
           </table>
+            </div>
         </div>
       </div>
     );
