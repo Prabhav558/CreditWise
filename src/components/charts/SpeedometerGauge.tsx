@@ -23,77 +23,184 @@ export const SpeedometerGauge = ({
   // Calculate needle rotation (180 degrees range: -90deg to +90deg)
   const needleRotation = -90 + (percentage * 180) / 100;
   
+  const centerX = size / 2;
+  const centerY = size * 0.5;
+  const radius = size * 0.35;
+  const strokeWidth = size * 0.1;
+  
+  // Create semicircle path
+  const createArcPath = (startAngle: number, endAngle: number, r: number) => {
+    const start = polarToCartesian(centerX, centerY, r, endAngle);
+    const end = polarToCartesian(centerX, centerY, r, startAngle);
+    const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+    return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`;
+  };
+  
+  function polarToCartesian(centerX: number, centerY: number, radius: number, angleInDegrees: number) {
+    const angleInRadians = (angleInDegrees - 90) * Math.PI / 180.0;
+    return {
+      x: centerX + (radius * Math.cos(angleInRadians)),
+      y: centerY + (radius * Math.sin(angleInRadians))
+    };
+  }
+
   return (
-    <div className="flex flex-col items-center space-y-2">
-      <div className="relative" style={{ width: size, height: size * 0.6 }}>
+    <div className="flex flex-col items-center space-y-4">
+      <div className="relative" style={{ width: size, height: size * 0.65 }}>
         <svg 
           width={size} 
-          height={size * 0.6} 
-          viewBox={`0 0 ${size} ${size * 0.6}`}
+          height={size * 0.65} 
+          viewBox={`0 0 ${size} ${size * 0.65}`}
           className="absolute inset-0"
         >
+          <defs>
+            {/* Gradient for the track */}
+            <linearGradient id="track-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#10b981" />
+              <stop offset="25%" stopColor="#f59e0b" />
+              <stop offset="50%" stopColor="#f97316" />
+              <stop offset="100%" stopColor="#ef4444" />
+            </linearGradient>
+            
+            {/* Shadow filter */}
+            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="hsl(var(--foreground))" floodOpacity="0.1"/>
+            </filter>
+          </defs>
+          
+          {/* Background semicircle */}
+          <path
+            d={createArcPath(0, 180, radius)}
+            fill="none"
+            stroke="hsl(var(--muted))"
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+            opacity="0.2"
+          />
+          
+          {/* Colored track segments */}
           {/* Green segment (0-25%) */}
           <path
-            d={`M ${size * 0.1} ${size * 0.5} A ${size * 0.4} ${size * 0.4} 0 0 1 ${size * 0.3} ${size * 0.18}`}
+            d={createArcPath(0, 45, radius)}
             fill="none"
-            stroke="#22c55e"
-            strokeWidth={size * 0.12}
+            stroke="#10b981"
+            strokeWidth={strokeWidth * 0.8}
             strokeLinecap="round"
+            filter="url(#shadow)"
           />
           
           {/* Yellow segment (25-50%) */}
           <path
-            d={`M ${size * 0.35} ${size * 0.15} A ${size * 0.4} ${size * 0.4} 0 0 1 ${size * 0.5} ${size * 0.1}`}
+            d={createArcPath(45, 90, radius)}
             fill="none"
-            stroke="#eab308"
-            strokeWidth={size * 0.12}
+            stroke="#f59e0b"
+            strokeWidth={strokeWidth * 0.8}
             strokeLinecap="round"
+            filter="url(#shadow)"
           />
           
           {/* Orange segment (50-75%) */}
           <path
-            d={`M ${size * 0.65} ${size * 0.15} A ${size * 0.4} ${size * 0.4} 0 0 1 ${size * 0.8} ${size * 0.3}`}
+            d={createArcPath(90, 135, radius)}
             fill="none"
             stroke="#f97316"
-            strokeWidth={size * 0.12}
+            strokeWidth={strokeWidth * 0.8}
             strokeLinecap="round"
+            filter="url(#shadow)"
           />
           
           {/* Red segment (75-100%) */}
           <path
-            d={`M ${size * 0.82} ${size * 0.35} A ${size * 0.4} ${size * 0.4} 0 0 1 ${size * 0.9} ${size * 0.5}`}
+            d={createArcPath(135, 180, radius)}
             fill="none"
             stroke="#ef4444"
-            strokeWidth={size * 0.12}
+            strokeWidth={strokeWidth * 0.8}
             strokeLinecap="round"
+            filter="url(#shadow)"
           />
+          
+          {/* Scale markers */}
+          {[0, 20, 40, 60, 80, 100].map((mark, index) => {
+            const angle = mark * 1.8; // 180 degrees / 100 = 1.8
+            const outerRadius = radius - strokeWidth * 0.3;
+            const innerRadius = radius - strokeWidth * 0.6;
+            const pos1 = polarToCartesian(centerX, centerY, innerRadius, angle);
+            const pos2 = polarToCartesian(centerX, centerY, outerRadius, angle);
+            
+            return (
+              <line
+                key={index}
+                x1={pos1.x}
+                y1={pos1.y}
+                x2={pos2.x}
+                y2={pos2.y}
+                stroke="hsl(var(--muted-foreground))"
+                strokeWidth={size * 0.008}
+                opacity="0.8"
+              />
+            );
+          })}
+          
+          {/* Scale numbers */}
+          {[0, 25, 50, 75, 100].map((mark, index) => {
+            const angle = mark * 1.8;
+            const textRadius = radius - strokeWidth * 1.2;
+            const pos = polarToCartesian(centerX, centerY, textRadius, angle);
+            
+            return (
+              <text
+                key={index}
+                x={pos.x}
+                y={pos.y + size * 0.012}
+                textAnchor="middle"
+                className="fill-muted-foreground text-xs font-medium"
+                style={{ fontSize: size * 0.08 }}
+              >
+                {mark}
+              </text>
+            );
+          })}
         </svg>
         
-        {/* Needle with circle end */}
+        {/* Needle */}
         <div 
-          className="absolute"
+          className="absolute bg-foreground shadow-md"
           style={{
-            width: size * 0.025,
-            height: size * 0.35,
-            backgroundColor: '#1f2937',
+            width: size * 0.015,
+            height: radius * 0.85,
             left: '50%',
-            bottom: size * 0.08,
+            bottom: size * 0.1,
             transformOrigin: 'bottom center',
             transform: `translateX(-50%) rotate(${needleRotation}deg)`,
-            borderRadius: `${size * 0.012}px`,
-            transition: 'transform 0.5s ease-out'
+            borderRadius: `${size * 0.008}px`,
+            transition: 'transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            zIndex: 10
           }}
         />
         
-        {/* Needle circle end */}
+        {/* Center hub */}
         <div 
-          className="absolute bg-gray-800 rounded-full border-2 border-white"
+          className="absolute bg-foreground rounded-full shadow-lg border-2 border-background"
           style={{
-            width: size * 0.08,
-            height: size * 0.08,
+            width: size * 0.1,
+            height: size * 0.1,
             left: '50%',
-            bottom: size * 0.04,
-            transform: 'translateX(-50%)'
+            bottom: size * 0.05,
+            transform: 'translateX(-50%)',
+            zIndex: 20
+          }}
+        />
+        
+        {/* Inner center dot */}
+        <div 
+          className="absolute bg-background rounded-full"
+          style={{
+            width: size * 0.04,
+            height: size * 0.04,
+            left: '50%',
+            bottom: size * 0.08,
+            transform: 'translateX(-50%)',
+            zIndex: 30
           }}
         />
       </div>
