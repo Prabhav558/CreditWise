@@ -105,21 +105,21 @@ const HowItWorks = () => {
                 <div className="flex items-center gap-3">
                   <div className="w-4 h-4 bg-green-500 rounded-full"></div>
                   <div>
-                    <span className="font-medium">Low Risk (0-30%)</span>
+                    <span className="font-medium">Low Risk (0-20%)</span>
                     <p className="text-sm text-muted-foreground">Safe to lend, minimal monitoring</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
                   <div>
-                    <span className="font-medium">Medium Risk (30-60%)</span>
+                    <span className="font-medium">Medium Risk (20-80%)</span>
                     <p className="text-sm text-muted-foreground">Moderate caution, regular monitoring</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
                   <div className="w-4 h-4 bg-red-500 rounded-full"></div>
                   <div>
-                    <span className="font-medium">High Risk (60%+)</span>
+                    <span className="font-medium">High Risk (80%+)</span>
                     <p className="text-sm text-muted-foreground">High default probability, strict controls</p>
                   </div>
                 </div>
