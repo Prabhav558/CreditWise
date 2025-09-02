@@ -309,227 +309,66 @@ const SyntheticData = () => {
   };
 
   const DataTable = ({ data, title }: { data: CSVData[], title: string }) => {
-    const [currentRowPage, setCurrentRowPage] = useState(0);
-    const [horizontalScroll, setHorizontalScroll] = useState(0);
-    
-    const rowsPerPage = 6;
-    const maxVisibleColumns = 4;
-    
     if (data.length === 0) return null;
 
     const columns = Object.keys(data[0] || {});
-    const totalPages = Math.ceil(data.length / rowsPerPage);
-    const currentRows = data.slice(currentRowPage * rowsPerPage, (currentRowPage + 1) * rowsPerPage);
-    
-    const visibleColumns = columns.slice(horizontalScroll, horizontalScroll + maxVisibleColumns);
-    const canScrollLeft = horizontalScroll > 0;
-    const canScrollRight = horizontalScroll + maxVisibleColumns < columns.length;
-    const canScrollUp = currentRowPage > 0;
-    const canScrollDown = currentRowPage < totalPages - 1;
-
-    const scrollHorizontal = (direction: 'left' | 'right') => {
-      if (direction === 'left' && canScrollLeft) {
-        setHorizontalScroll(Math.max(0, horizontalScroll - 1));
-      } else if (direction === 'right' && canScrollRight) {
-        setHorizontalScroll(Math.min(columns.length - maxVisibleColumns, horizontalScroll + 1));
-      }
-    };
-
-    const scrollVertical = (direction: 'up' | 'down') => {
-      if (direction === 'up' && canScrollUp) {
-        setCurrentRowPage(currentRowPage - 1);
-      } else if (direction === 'down' && canScrollDown) {
-        setCurrentRowPage(currentRowPage + 1);
-      }
-    };
-
-    // Count empty cells in visible data for debugging
-    const emptyCellsInVisible = currentRows.reduce((count, row) => {
-      return count + visibleColumns.reduce((cellCount, col) => {
-        return cellCount + (isEmptyValue(row[col]) ? 1 : 0);
-      }, 0);
-    }, 0);
 
     return (
       <div className="w-full max-w-full">
-        {/* Header with navigation controls */}
+        {/* Header */}
         <div className="flex items-center justify-between mb-4 gap-4">
           <div className="flex items-center gap-4">
             <h3 className="text-lg font-semibold">{title}</h3>
             <span className="text-sm text-muted-foreground">
               {data.length} rows • {columns.length} columns
             </span>
-            {title.includes("Preview") && emptyCellsInVisible > 0 && (
-              <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                {emptyCellsInVisible} empty cells visible
-              </span>
-            )}
-          </div>
-          
-          {/* Navigation Controls */}
-          <div className="flex items-center gap-2">
-            {/* Horizontal scroll controls */}
-            <div className="flex items-center gap-1 border rounded p-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => scrollHorizontal('left')}
-                disabled={!canScrollLeft}
-                className="h-7 w-7 p-0"
-                title="Previous columns"
-              >
-                <ChevronLeft className="h-3 w-3" />
-              </Button>
-              <span className="text-xs text-muted-foreground px-2">
-                {horizontalScroll + 1}-{Math.min(horizontalScroll + maxVisibleColumns, columns.length)} of {columns.length}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => scrollHorizontal('right')}
-                disabled={!canScrollRight}
-                className="h-7 w-7 p-0"
-                title="Next columns"
-              >
-                <ChevronRight className="h-3 w-3" />
-              </Button>
-            </div>
-
-            {/* Vertical scroll controls */}
-            <div className="flex items-center gap-1 border rounded p-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => scrollVertical('up')}
-                disabled={!canScrollUp}
-                className="h-7 w-7 p-0"
-                title="Previous rows"
-              >
-                <ChevronUp className="h-3 w-3" />
-              </Button>
-              <span className="text-xs text-muted-foreground px-2">
-                {currentRowPage + 1} of {totalPages}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => scrollVertical('down')}
-                disabled={!canScrollDown}
-                className="h-7 w-7 p-0"
-                title="Next rows"
-              >
-                <ChevronDown className="h-3 w-3" />
-              </Button>
-            </div>
           </div>
         </div>
 
-        {/* Table Container - Fixed size */}
-        <div className="border rounded-lg overflow-hidden bg-background w-full">
-          <div className="w-full">
-            <table className="w-full border-collapse text-sm">
-              {/* Fixed Header */}
-              <thead className="bg-muted/50">
-                <tr>
-                  {visibleColumns.map((header, index) => (
-                    <th 
-                      key={`${header}-${index}`} 
-                      className="text-left p-3 border-b font-medium bg-muted/50 w-1/4"
-                    >
-                      <div className="truncate font-semibold" title={header}>
-                        {header}
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              
-              {/* Fixed Body - exactly 6 rows */}
-              <tbody>
-                {Array.from({ length: rowsPerPage }).map((_, rowIndex) => {
-                  const row = currentRows[rowIndex];
-                  if (!row) {
-                    // Empty row for consistent height
-                    return (
-                      <tr key={`empty-${rowIndex}`} className="border-b">
-                        {visibleColumns.map((_, colIndex) => (
-                          <td key={`empty-cell-${colIndex}`} className="p-3 border-r border-border/30 h-12">
-                            <div className="w-full h-6"></div>
-                          </td>
-                        ))}
-                      </tr>
-                    );
-                  }
-                  
-                  return (
-                    <tr key={`row-${currentRowPage}-${rowIndex}`} className="border-b hover:bg-muted/25 transition-colors">
-                      {visibleColumns.map((column, colIndex) => {
-                        const value = row[column];
-                        const isEmpty = isEmptyValue(value);
-                        return (
-                          <td key={`cell-${colIndex}`} className="p-3 border-r border-border/30">
-                            {isEmpty ? (
-                              <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-destructive/10 text-destructive font-medium">
-                                empty
-                              </span>
-                            ) : (
-                              <div className="truncate" title={String(value)}>
-                                {String(value)}
-                              </div>
-                            )}
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Footer with scroll indicators */}
-          <div className="flex items-center justify-between p-3 bg-muted/20 border-t text-sm text-muted-foreground">
-            <div className="flex items-center gap-4">
-              <span>
-                Rows: {currentRowPage * rowsPerPage + 1}-{Math.min((currentRowPage + 1) * rowsPerPage, data.length)} of {data.length}
-              </span>
-              <span>
-                Columns: {horizontalScroll + 1}-{Math.min(horizontalScroll + maxVisibleColumns, columns.length)} of {columns.length}
-              </span>
-            </div>
+        {/* Table Container with native scrolling */}
+        <div className="border rounded-lg bg-background w-full h-96 overflow-auto">
+          <table className="min-w-max border-collapse text-sm">
+            {/* Header */}
+            <thead className="bg-muted/50 sticky top-0 z-10">
+              <tr>
+                {columns.map((header, index) => (
+                  <th 
+                    key={`${header}-${index}`} 
+                    className="text-left p-3 border-b font-medium bg-muted/50 min-w-[150px]"
+                  >
+                    <div className="font-semibold" title={header}>
+                      {header}
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
             
-            {/* Visual scroll indicators */}
-            <div className="flex items-center gap-2">
-              <span className="text-xs">Navigate with buttons above</span>
-              <div className="flex items-center gap-1">
-                {/* Column indicator */}
-                <div className="flex gap-0.5">
-                  {Array.from({ length: Math.ceil(columns.length / maxVisibleColumns) }).map((_, i) => (
-                    <div
-                      key={i}
-                      className={`w-2 h-2 rounded-full ${
-                        Math.floor(horizontalScroll / maxVisibleColumns) === i 
-                          ? 'bg-primary' 
-                          : 'bg-muted-foreground/30'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <div className="w-px h-3 bg-border mx-1" />
-                {/* Row indicator */}
-                <div className="flex gap-0.5">
-                  {Array.from({ length: totalPages }).map((_, i) => (
-                    <div
-                      key={i}
-                      className={`w-2 h-2 rounded-full ${
-                        currentRowPage === i ? 'bg-primary' : 'bg-muted-foreground/30'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+            {/* Body */}
+            <tbody>
+              {data.map((row, rowIndex) => (
+                <tr key={`row-${rowIndex}`} className="border-b hover:bg-muted/25 transition-colors">
+                  {columns.map((column, colIndex) => {
+                    const value = row[column];
+                    const isEmpty = isEmptyValue(value);
+                    return (
+                      <td key={`cell-${colIndex}`} className="p-3 border-r border-border/30">
+                        {isEmpty ? (
+                          <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-destructive/10 text-destructive font-medium">
+                            empty
+                          </span>
+                        ) : (
+                          <div className="truncate" title={String(value)}>
+                            {String(value)}
+                          </div>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     );
