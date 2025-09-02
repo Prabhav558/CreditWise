@@ -54,7 +54,7 @@ All colors MUST be HSL.
 
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    /* Finshield enhancements */
+    /* CreditWise enhancements */
     --primary-glow: 222.2 70% 25%;
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
     --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(210 40% 99%));
@@ -99,7 +99,7 @@ All colors MUST be HSL.
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
 
-    /* Finshield dark tweaks */
+    /* CreditWise dark tweaks */
     --primary-glow: 222.2 70% 80%;
     --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
     --gradient-subtle: linear-gradient(180deg, hsl(222.2 84% 6%), hsl(222.2 84% 4.9%));

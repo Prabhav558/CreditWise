@@ -49,7 +49,7 @@ export type UserRow = Record<string, string | number | undefined> & {
   prediction_proba?: number; // if provided
 };
 
-const demoData: UserRow[] = [
+  const demoData: UserRow[] = [
   {
     user_id: "U-1024",
     default_flag: 0,

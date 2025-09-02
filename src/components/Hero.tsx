@@ -12,7 +12,7 @@ const Hero = () => {
       <div className="mx-auto max-w-4xl text-center py-16 md:py-24 animate-enter">
         <div className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs md:text-sm bg-secondary/50 backdrop-blur">
           <Shield className="opacity-70" size={16} />
-          Finshield — Alternative Data Credit Risk
+          CreditWise — Alternative Data Credit Risk
         </div>
         <h1 className="mt-6 text-3xl md:text-6xl font-semibold tracking-tight">
           <span className="bg-gradient-primary bg-clip-text text-transparent">
@@ -28,7 +28,7 @@ const Hero = () => {
               Get Started
             </Button>
           </a>
-          <a className="story-link" href="#how-it-works">How it works</a>
+          <a className="story-link" href="/how-it-works">How it works</a>
         </div>
         <div className="mt-10 inline-flex items-center gap-2 text-sm text-muted-foreground">
           <TrendingUp className="opacity-70" size={16} /> Real-time monitoring ready

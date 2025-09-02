@@ -26,7 +26,7 @@ export default function FloatingChatbot() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'Hello! I\'m your Finshield assistant. How can I help you with credit risk analysis today?',
+      text: 'Hello! I\'m your CreditWise assistant. How can I help you with credit risk analysis today?',
       sender: 'bot',
       timestamp: new Date()
     }
@@ -55,7 +55,7 @@ export default function FloatingChatbot() {
       
       let responseText = result.answer;
       if (!responseText || responseText === "No response.") {
-        responseText = "Sorry, I couldn't find that in FinShield's context.";
+        responseText = "Sorry, I couldn't find that in CreditWise's context.";
       }
 
       const botMessage: Message = {
