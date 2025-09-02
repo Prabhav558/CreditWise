@@ -326,57 +326,63 @@ const SyntheticData = () => {
         </div>
 
         {/* Table Container with scrolling */}
-        <div className="border rounded-lg bg-background w-full h-96 overflow-x-auto overflow-y-hidden">
-          <div className="h-full overflow-y-auto">
-          <table className="border-collapse text-sm min-w-max">
-            {/* Header */}
-            <thead className="bg-muted/50 sticky top-0 z-10">
-              <tr>
-                {columns.map((header, index) => (
-                  <th
-                    key={`${header}-${index}`}
-                    className="text-left p-3 border-b font-medium bg-muted/50 min-w-[200px]"
-                  >
-                    <div className="font-semibold" title={header}>
-                      {header}
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-
-            {/* Body */}
-            <tbody>
-              {data.map((row, rowIndex) => (
-                <tr
-                  key={`row-${rowIndex}`}
-                  className="border-b hover:bg-muted/25 transition-colors"
-                >
-                  {columns.map((column, colIndex) => {
-                    const value = row[column];
-                    const isEmpty = isEmptyValue(value);
-                    return (
-                      <td
-                        key={`cell-${colIndex}`}
-                        className="p-3 border-r border-border/30"
+        <div className="border rounded-lg bg-background w-full h-96">
+          <div className="w-full h-full overflow-x-auto overflow-y-hidden overscroll-x-contain">
+            <div className="h-full overflow-y-auto">
+              <table className="border-collapse text-sm w-max">
+                {/* Header */}
+                <thead className="bg-muted/50 sticky top-0 z-10">
+                  <tr>
+                    {columns.map((header, index) => (
+                      <th
+                        key={`${header}-${index}`}
+                        className={`text-left p-3 border-b font-medium bg-muted/50 min-w-[200px] ${
+                          index === 0 ? 'sticky left-0 z-20' : ''
+                        }`}
                       >
-                        {isEmpty ? (
-                          <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-destructive/10 text-destructive font-medium">
-                            empty
-                          </span>
-                        ) : (
-                          <div className="max-w-[180px]" title={String(value)}>
-                            {String(value)}
-                          </div>
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                        <div className="font-semibold" title={header}>
+                          {header}
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+
+                {/* Body */}
+                <tbody>
+                  {data.map((row, rowIndex) => (
+                    <tr
+                      key={`row-${rowIndex}`}
+                      className="border-b hover:bg-muted/25 transition-colors"
+                    >
+                      {columns.map((column, colIndex) => {
+                        const value = row[column];
+                        const isEmpty = isEmptyValue(value);
+                        return (
+                          <td
+                            key={`cell-${colIndex}`}
+                            className={`p-3 border-r border-border/30 ${
+                              colIndex === 0 ? 'sticky left-0 z-10 bg-background' : ''
+                            }`}
+                          >
+                            {isEmpty ? (
+                              <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-destructive/10 text-destructive font-medium">
+                                empty
+                              </span>
+                            ) : (
+                              <div className="max-w-[180px]" title={String(value)}>
+                                {String(value)}
+                              </div>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
+          </div>
         </div>
       </div>
     );
