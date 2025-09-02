@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { Download, Upload, FileSpreadsheet, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
+import { Download, Upload, FileSpreadsheet, RefreshCw, ChevronLeft, ChevronRight, ChevronUp, ChevronDown } from "lucide-react";
 
 interface CSVData {
   [key: string]: any;
@@ -190,140 +190,213 @@ const SyntheticData = () => {
   };
 
   const DataTable = ({ data, title }: { data: CSVData[], title: string }) => {
-    const [scrollPosition, setScrollPosition] = useState(0);
-    const scrollContainerRef = useRef<HTMLDivElement>(null);
-    const [canScrollLeft, setCanScrollLeft] = useState(false);
-    const [canScrollRight, setCanScrollRight] = useState(false);
-
-    const checkScrollButtons = () => {
-      if (scrollContainerRef.current) {
-        const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
-        setCanScrollLeft(scrollLeft > 0);
-        setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
-      }
-    };
-
-    useEffect(() => {
-      checkScrollButtons();
-      const container = scrollContainerRef.current;
-      if (container) {
-        container.addEventListener('scroll', checkScrollButtons);
-        return () => container.removeEventListener('scroll', checkScrollButtons);
-      }
-    }, [data]);
-
-    const scroll = (direction: 'left' | 'right') => {
-      if (scrollContainerRef.current) {
-        const scrollAmount = 300;
-        const newScrollLeft = direction === 'left' 
-          ? scrollContainerRef.current.scrollLeft - scrollAmount
-          : scrollContainerRef.current.scrollLeft + scrollAmount;
-        
-        scrollContainerRef.current.scrollTo({
-          left: newScrollLeft,
-          behavior: 'smooth'
-        });
-      }
-    };
-
+    const [currentRowPage, setCurrentRowPage] = useState(0);
+    const [horizontalScroll, setHorizontalScroll] = useState(0);
+    const horizontalScrollRef = useRef<HTMLDivElement>(null);
+    const verticalScrollRef = useRef<HTMLDivElement>(null);
+    
+    const rowsPerPage = 6;
+    const maxVisibleColumns = 4; // Show only 4 columns initially
+    
     if (data.length === 0) return null;
 
+    const columns = Object.keys(data[0] || {});
+    const totalPages = Math.ceil(data.length / rowsPerPage);
+    const currentRows = data.slice(currentRowPage * rowsPerPage, (currentRowPage + 1) * rowsPerPage);
+    
+    const visibleColumns = columns.slice(horizontalScroll, horizontalScroll + maxVisibleColumns);
+    const canScrollLeft = horizontalScroll > 0;
+    const canScrollRight = horizontalScroll + maxVisibleColumns < columns.length;
+    const canScrollUp = currentRowPage > 0;
+    const canScrollDown = currentRowPage < totalPages - 1;
+
+    const scrollHorizontal = (direction: 'left' | 'right') => {
+      if (direction === 'left' && canScrollLeft) {
+        setHorizontalScroll(Math.max(0, horizontalScroll - 1));
+      } else if (direction === 'right' && canScrollRight) {
+        setHorizontalScroll(Math.min(columns.length - maxVisibleColumns, horizontalScroll + 1));
+      }
+    };
+
+    const scrollVertical = (direction: 'up' | 'down') => {
+      if (direction === 'up' && canScrollUp) {
+        setCurrentRowPage(currentRowPage - 1);
+      } else if (direction === 'down' && canScrollDown) {
+        setCurrentRowPage(currentRowPage + 1);
+      }
+    };
+
     return (
-      <div className="relative">
-        {/* Scroll indicators */}
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-sm text-muted-foreground">
-            {title} • {data.length} rows • {Object.keys(data[0] || {}).length} columns
-          </p>
+      <div className="w-full max-w-full">
+        {/* Header with navigation controls */}
+        <div className="flex items-center justify-between mb-4 gap-4">
+          <div className="flex items-center gap-4">
+            <h3 className="text-lg font-semibold">{title}</h3>
+            <span className="text-sm text-muted-foreground">
+              {data.length} rows • {columns.length} columns
+            </span>
+          </div>
+          
+          {/* Navigation Controls */}
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => scroll('left')}
-              disabled={!canScrollLeft}
-              className="h-8 w-8 p-0"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => scroll('right')}
-              disabled={!canScrollRight}
-              className="h-8 w-8 p-0"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
+            {/* Horizontal scroll controls */}
+            <div className="flex items-center gap-1 border rounded p-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => scrollHorizontal('left')}
+                disabled={!canScrollLeft}
+                className="h-7 w-7 p-0"
+                title="Previous columns"
+              >
+                <ChevronLeft className="h-3 w-3" />
+              </Button>
+              <span className="text-xs text-muted-foreground px-2">
+                {horizontalScroll + 1}-{Math.min(horizontalScroll + maxVisibleColumns, columns.length)} of {columns.length}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => scrollHorizontal('right')}
+                disabled={!canScrollRight}
+                className="h-7 w-7 p-0"
+                title="Next columns"
+              >
+                <ChevronRight className="h-3 w-3" />
+              </Button>
+            </div>
+
+            {/* Vertical scroll controls */}
+            <div className="flex items-center gap-1 border rounded p-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => scrollVertical('up')}
+                disabled={!canScrollUp}
+                className="h-7 w-7 p-0"
+                title="Previous rows"
+              >
+                <ChevronUp className="h-3 w-3" />
+              </Button>
+              <span className="text-xs text-muted-foreground px-2">
+                {currentRowPage + 1} of {totalPages}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => scrollVertical('down')}
+                disabled={!canScrollDown}
+                className="h-7 w-7 p-0"
+                title="Next rows"
+              >
+                <ChevronDown className="h-3 w-3" />
+              </Button>
+            </div>
           </div>
         </div>
 
-        {/* Table container with strict width constraints */}
-        <div className="border rounded-lg overflow-hidden bg-background">
-          <div 
-            ref={scrollContainerRef}
-            className="overflow-x-auto overflow-y-hidden"
-            style={{ maxWidth: '100%' }}
-            onScroll={checkScrollButtons}
-          >
-            <div className="min-w-max">
-              <table className="border-collapse w-full text-sm">
-                <thead className="bg-muted/50 sticky top-0 z-10">
-                  <tr>
-                    {Object.keys(data[0] || {}).map((header) => (
-                      <th key={header} className="text-left p-3 border-b font-medium bg-muted/50">
-                        <div 
-                          className="w-[140px] truncate font-semibold" 
-                          title={header}
-                        >
-                          {header}
-                        </div>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.slice(0, 10).map((row, index) => (
-                    <tr key={index} className="border-b hover:bg-muted/25 transition-colors">
-                      {Object.values(row).map((value, cellIndex) => (
-                        <td key={cellIndex} className="p-3 border-r border-border/30">
-                          {value === null || value === undefined || value === '' ? (
-                            <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-destructive/10 text-destructive font-medium">
-                              empty
-                            </span>
-                          ) : (
-                            <div 
-                              className="w-[140px] text-foreground truncate" 
-                              title={String(value)}
-                            >
-                              {String(value)}
-                            </div>
-                          )}
-                        </td>
-                      ))}
-                    </tr>
+        {/* Table Container - Fixed size */}
+        <div className="border rounded-lg overflow-hidden bg-background w-full">
+          <div className="w-full">
+            <table className="w-full border-collapse text-sm">
+              {/* Fixed Header */}
+              <thead className="bg-muted/50">
+                <tr>
+                  {visibleColumns.map((header, index) => (
+                    <th 
+                      key={`${header}-${index}`} 
+                      className="text-left p-3 border-b font-medium bg-muted/50 w-1/4"
+                    >
+                      <div className="truncate font-semibold" title={header}>
+                        {header}
+                      </div>
+                    </th>
                   ))}
-                </tbody>
-              </table>
-            </div>
+                </tr>
+              </thead>
+              
+              {/* Fixed Body - exactly 6 rows */}
+              <tbody>
+                {Array.from({ length: rowsPerPage }).map((_, rowIndex) => {
+                  const row = currentRows[rowIndex];
+                  if (!row) {
+                    // Empty row for consistent height
+                    return (
+                      <tr key={`empty-${rowIndex}`} className="border-b">
+                        {visibleColumns.map((_, colIndex) => (
+                          <td key={`empty-cell-${colIndex}`} className="p-3 border-r border-border/30 h-12">
+                            <div className="w-full h-6"></div>
+                          </td>
+                        ))}
+                      </tr>
+                    );
+                  }
+                  
+                  return (
+                    <tr key={`row-${currentRowPage}-${rowIndex}`} className="border-b hover:bg-muted/25 transition-colors">
+                      {visibleColumns.map((column, colIndex) => {
+                        const value = row[column];
+                        return (
+                          <td key={`cell-${colIndex}`} className="p-3 border-r border-border/30">
+                            {value === null || value === undefined || value === '' ? (
+                              <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-destructive/10 text-destructive font-medium">
+                                empty
+                              </span>
+                            ) : (
+                              <div className="truncate" title={String(value)}>
+                                {String(value)}
+                              </div>
+                            )}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
 
-          {/* Enhanced scroll indicator footer */}
+          {/* Footer with scroll indicators */}
           <div className="flex items-center justify-between p-3 bg-muted/20 border-t text-sm text-muted-foreground">
-            <span>Showing first 10 of {data.length} rows</span>
+            <div className="flex items-center gap-4">
+              <span>
+                Rows: {currentRowPage * rowsPerPage + 1}-{Math.min((currentRowPage + 1) * rowsPerPage, data.length)} of {data.length}
+              </span>
+              <span>
+                Columns: {horizontalScroll + 1}-{Math.min(horizontalScroll + maxVisibleColumns, columns.length)} of {columns.length}
+              </span>
+            </div>
+            
+            {/* Visual scroll indicators */}
             <div className="flex items-center gap-2">
-              <span className="hidden sm:inline">Use scroll buttons or drag to view all columns</span>
+              <span className="text-xs">Navigate with buttons above</span>
               <div className="flex items-center gap-1">
-                <div className={`w-2 h-2 rounded-full ${canScrollLeft ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
-                <div className="w-8 h-1 bg-muted-foreground/30 rounded-full relative overflow-hidden">
-                  <div 
-                    className="h-full bg-primary rounded-full transition-all duration-300"
-                    style={{ 
-                      width: '30%',
-                      transform: `translateX(${scrollPosition}%)` 
-                    }}
-                  />
+                {/* Column indicator */}
+                <div className="flex gap-0.5">
+                  {Array.from({ length: Math.ceil(columns.length / maxVisibleColumns) }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`w-2 h-2 rounded-full ${
+                        Math.floor(horizontalScroll / maxVisibleColumns) === i 
+                          ? 'bg-primary' 
+                          : 'bg-muted-foreground/30'
+                      }`}
+                    />
+                  ))}
                 </div>
-                <div className={`w-2 h-2 rounded-full ${canScrollRight ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+                <div className="w-px h-3 bg-border mx-1" />
+                {/* Row indicator */}
+                <div className="flex gap-0.5">
+                  {Array.from({ length: totalPages }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`w-2 h-2 rounded-full ${
+                        currentRowPage === i ? 'bg-primary' : 'bg-muted-foreground/30'
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -334,7 +407,7 @@ const SyntheticData = () => {
 
   return (
     <main className="container mx-auto px-4 py-8">
-      <div className="max-w-full mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-semibold mb-4">
             <span className="bg-gradient-primary bg-clip-text text-transparent">
@@ -391,7 +464,6 @@ const SyntheticData = () => {
               {csvData.length > 0 && (
                 <div className="mt-6">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold">Data Preview</h3>
                     <Button 
                       onClick={processData}
                       disabled={isProcessing}
@@ -402,7 +474,7 @@ const SyntheticData = () => {
                     </Button>
                   </div>
                   
-                  <DataTable data={csvData} title="Original Data" />
+                  <DataTable data={csvData} title="Data Preview" />
                 </div>
               )}
             </CardContent>
