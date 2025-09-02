@@ -18,7 +18,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Upload, Sparkles, BarChart3, Download } from "lucide-react";
-import * as XLSX from "xlsx";
+import * as ExcelJS from "exceljs";
 import { toast } from "@/hooks/use-toast";
 import { SpeedometerGauge } from "./charts/SpeedometerGauge";
 
@@ -223,17 +223,12 @@ const CreditRiskAnalyzer = () => {
   };
 
   /**
-   * Download with row-level coloring based on pd_score:
+   * Download with row-level coloring based on pd_score using ExcelJS:
    *  0  - 20  => Green
    *  >20- 80  => Yellow
    *  >80-100  => Red
-   * We color the entire row for which pd_score falls into the band.
-   *
-   * NOTE: Cell styling (.s) requires a SheetJS version that supports writing styles.
-   * If you do not see colors, ensure you're using a recent SheetJS build with style write enabled,
-   * or switch to a styled fork (e.g. 'xlsx-style').
    */
-  const downloadExcel = () => {
+  const downloadExcel = async () => {
     if (rows.length === 0) {
       toast({
         title: "No data to download",
@@ -243,86 +238,79 @@ const CreditRiskAnalyzer = () => {
       return;
     }
 
-    // Recompute PD and also generate probability / score fields to persist
+    // Recompute PD and generate updated data
     const updatedData = rows.map((row) => {
       const pdValue = computePD(row, stats); // 0..100
       return {
         ...row,
-        // Provide both raw probability and pd_score for clarity
         default_flag: pdValue / 100, // probability (0..1)
         prediction_proba: Math.random(), // random sample probability
         pd_score: Math.round(pdValue), // integer PD score 0..100
       };
     });
 
-    const worksheet = XLSX.utils.json_to_sheet(updatedData);
+    // Create new workbook and worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('Risk Analysis');
 
-    // Determine columns
+    // Get headers
     const headers = Object.keys(updatedData[0]);
-    const pdScoreColIndex = headers.indexOf("pd_score");
+    const pdScoreColIndex = headers.indexOf("pd_score") + 1; // ExcelJS is 1-indexed
 
-    if (pdScoreColIndex === -1) {
-      // Fallback: just write file
-      const wbSimple = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wbSimple, worksheet, "Risk Analysis");
-      XLSX.writeFile(wbSimple, `risk_analysis_${new Date().toISOString().split("T")[0]}.xlsx`);
-      toast({
-        title: "Excel downloaded",
-        description: `${updatedData.length} rows exported (no pd_score column detected for styling).`,
-      });
-      return;
-    }
-
-    // Range of the sheet
-    const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1");
-
-    // Helper: choose fill color by PD score
-    // Colors chosen as solid fills (hex without #, RGB). Adjust if you prefer lighter shades.
-    const pickFillRGB = (pd: number): string => {
-      if (pd <= 20) return "22C55E";      // green
-      if (pd <= 80) return "EAB308";      // yellow
-      return "EF4444";                    // red
+    // Add headers with styling
+    worksheet.addRow(headers);
+    worksheet.getRow(1).font = { bold: true };
+    worksheet.getRow(1).fill = {
+      type: 'pattern',
+      pattern: 'solid',
+      fgColor: { argb: 'FFF3F4F6' }
     };
 
-    // Apply row-level coloring
-    for (let r = range.s.r + 1; r <= range.e.r; r++) {
-      const pdCellAddress = XLSX.utils.encode_cell({ r, c: pdScoreColIndex });
-      const pdCell = worksheet[pdCellAddress];
-      if (!pdCell) continue;
-
-      const pdValue = typeof pdCell.v === "number" ? pdCell.v : toNumber(pdCell.v);
-      const fillRGB = pickFillRGB(pdValue);
-
-      // Color EVERY cell in this row
-      for (let c = range.s.c; c <= range.e.c; c++) {
-        const cellAddress = XLSX.utils.encode_cell({ r, c });
-        const cell = worksheet[cellAddress];
-        if (!cell) continue;
-        // If a style object already exists, preserve other props
-        worksheet[cellAddress].s = {
-          ...(cell.s || {}),
-          fill: { patternType: "solid", fgColor: { rgb: fillRGB } },
-        };
+    // Add data rows with conditional formatting
+    updatedData.forEach((row, index) => {
+      const rowData = headers.map(header => row[header]);
+      const worksheetRow = worksheet.addRow(rowData);
+      
+      // Get PD score for this row
+      const pdScore = row.pd_score || 0;
+      
+      // Determine row color based on PD score
+      let fillColor = 'FFFFFFFF'; // default white
+      if (pdScore <= 20) {
+        fillColor = 'FF22C55E'; // green
+      } else if (pdScore <= 80) {
+        fillColor = 'FFEAB308'; // yellow  
+      } else {
+        fillColor = 'FFEF4444'; // red
       }
-    }
-
-    // Optional: bold header row
-    for (let c = range.s.c; c <= range.e.c; c++) {
-      const headerAddress = XLSX.utils.encode_cell({ r: range.s.r, c });
-      if (worksheet[headerAddress]) {
-        worksheet[headerAddress].s = {
-          ...(worksheet[headerAddress].s || {}),
-            font: { bold: true },
-            fill: { patternType: "solid", fgColor: { rgb: "F3F4F6" } },
+      
+      // Apply fill to entire row
+      worksheetRow.eachCell((cell) => {
+        cell.fill = {
+          type: 'pattern',
+          pattern: 'solid',
+          fgColor: { argb: fillColor }
         };
-      }
-    }
+      });
+    });
 
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Risk Analysis");
+    // Auto-size columns
+    worksheet.columns.forEach((column) => {
+      column.width = 15;
+    });
 
-    const fileName = `risk_analysis_${new Date().toISOString().split("T")[0]}.xlsx`;
-    XLSX.writeFile(workbook, fileName);
+    // Generate buffer and download
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    });
+    
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `risk_analysis_${new Date().toISOString().split("T")[0]}.xlsx`;
+    link.click();
+    window.URL.revokeObjectURL(url);
 
     toast({
       title: "Excel downloaded",
