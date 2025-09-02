@@ -26,6 +26,7 @@ import { toast } from "@/hooks/use-toast";
 import { DashboardSpeedometer } from "./charts/DashboardSpeedometer";
 import { HorizontalBarChart } from "./charts/HorizontalBarChart";
 import { VerticalBarChart } from "./charts/VerticalBarChart";
+import { SpeedometerGauge } from "./charts/SpeedometerGauge";
 
 export type UserRow = Record<string, string | number | undefined> & {
   user_id?: string | number;
@@ -404,40 +405,31 @@ const CreditRiskAnalyzer = () => {
                   </div>
                 </div>
 
-                {/* Key Behavioral Markers */}
+                {/* Key Behavioral Markers - Speedometer Gauges */}
                 <div className="space-y-4">
                   <h3 className="text-xl font-semibold text-center">Key Behavioral Markers</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="text-center space-y-2">
-                      <div className={`text-2xl font-bold px-4 py-2 rounded-lg ${
-                        toNumber(selectedRow.payment_delay_ratio) <= 0.33 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' :
-                        toNumber(selectedRow.payment_delay_ratio) <= 0.66 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100' :
-                        'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
-                      }`}>
-                        {(toNumber(selectedRow.payment_delay_ratio) * 100).toFixed(1)}%
-                      </div>
-                      <div className="text-sm text-muted-foreground">Payment Delay Ratio</div>
-                    </div>
-                    <div className="text-center space-y-2">
-                      <div className={`text-2xl font-bold px-4 py-2 rounded-lg ${
-                        toNumber(selectedRow.cart_abandonment_rate) <= 0.33 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' :
-                        toNumber(selectedRow.cart_abandonment_rate) <= 0.66 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100' :
-                        'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
-                      }`}>
-                        {(toNumber(selectedRow.cart_abandonment_rate) * 100).toFixed(1)}%
-                      </div>
-                      <div className="text-sm text-muted-foreground">Cart Abandonment Rate</div>
-                    </div>
-                    <div className="text-center space-y-2">
-                      <div className={`text-2xl font-bold px-4 py-2 rounded-lg ${
-                        toNumber(selectedRow.geo_variance_score) <= 0.33 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100' :
-                        toNumber(selectedRow.geo_variance_score) <= 0.66 ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-100' :
-                        'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100'
-                      }`}>
-                        {toNumber(selectedRow.geo_variance_score).toFixed(2)}
-                      </div>
-                      <div className="text-sm text-muted-foreground">Geo-variance Score</div>
-                    </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 justify-items-center">
+                    <SpeedometerGauge
+                      value={toNumber(selectedRow.payment_delay_ratio)}
+                      max={1}
+                      title="Payment Delay Ratio"
+                      unit="%"
+                      size={140}
+                    />
+                    <SpeedometerGauge
+                      value={toNumber(selectedRow.cart_abandonment_rate)}
+                      max={1}
+                      title="Cart Abandonment Rate"
+                      unit="%"
+                      size={140}
+                    />
+                    <SpeedometerGauge
+                      value={toNumber(selectedRow.geo_variance_score)}
+                      max={10}
+                      title="Geo-variance Score"
+                      unit=""
+                      size={140}
+                    />
                   </div>
                 </div>
 
