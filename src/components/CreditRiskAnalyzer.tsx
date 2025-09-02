@@ -408,7 +408,7 @@ const CreditRiskAnalyzer = () => {
                 {/* Key Behavioral Markers - Speedometer Gauges */}
                 <div className="space-y-4">
                   <h3 className="text-xl font-semibold text-center">Key Behavioral Markers</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 justify-items-center [&>*]:rotate-[-90deg]">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 justify-items-center">
                     <SpeedometerGauge
                       value={toNumber(selectedRow.payment_delay_ratio)}
                       max={1}
