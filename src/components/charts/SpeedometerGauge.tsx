@@ -32,67 +32,49 @@ export const SpeedometerGauge = ({
           viewBox={`0 0 ${size} ${size * 0.6}`}
           className="absolute inset-0"
         >
-          {/* Define the colored segments with gaps */}
-          <defs>
-            <mask id="gaugeMask">
-              <rect width="100%" height="100%" fill="black"/>
-              <circle 
-                cx={size/2} 
-                cy={size * 0.6} 
-                r={size * 0.25} 
-                fill="white"
-              />
-            </mask>
-          </defs>
-          
-          {/* Green segment (0-25%) */}
+          {/* Green segment */}
           <path
-            d={`M ${size * 0.1} ${size * 0.5} A ${size * 0.4} ${size * 0.4} 0 0 1 ${size * 0.35} ${size * 0.15}`}
+            d={`M ${size * 0.15} ${size * 0.45} A ${size * 0.35} ${size * 0.35} 0 0 1 ${size * 0.3} ${size * 0.2}`}
             fill="none"
             stroke="#22c55e"
-            strokeWidth={size * 0.08}
+            strokeWidth={size * 0.1}
             strokeLinecap="round"
-            mask="url(#gaugeMask)"
           />
           
-          {/* Light Green segment (25-50%) */}
+          {/* Light Green segment */}
           <path
-            d={`M ${size * 0.4} ${size * 0.12} A ${size * 0.4} ${size * 0.4} 0 0 1 ${size * 0.5} ${size * 0.1}`}
+            d={`M ${size * 0.35} ${size * 0.15} A ${size * 0.35} ${size * 0.35} 0 0 1 ${size * 0.5} ${size * 0.125}`}
             fill="none"
             stroke="#84cc16"
-            strokeWidth={size * 0.08}
+            strokeWidth={size * 0.1}
             strokeLinecap="round"
-            mask="url(#gaugeMask)"
           />
           
-          {/* Yellow segment (50-75%) */}
+          {/* Yellow segment */}
           <path
-            d={`M ${size * 0.6} ${size * 0.12} A ${size * 0.4} ${size * 0.4} 0 0 1 ${size * 0.75} ${size * 0.25}`}
+            d={`M ${size * 0.55} ${size * 0.15} A ${size * 0.35} ${size * 0.35} 0 0 1 ${size * 0.7} ${size * 0.2}`}
             fill="none"
-            stroke="#eab308"
-            strokeWidth={size * 0.08}
+            stroke="#fbbf24"
+            strokeWidth={size * 0.1}
             strokeLinecap="round"
-            mask="url(#gaugeMask)"
           />
           
-          {/* Orange segment (75-87.5%) */}
+          {/* Orange segment */}
           <path
-            d={`M ${size * 0.78} ${size * 0.28} A ${size * 0.4} ${size * 0.4} 0 0 1 ${size * 0.85} ${size * 0.4}`}
+            d={`M ${size * 0.75} ${size * 0.25} A ${size * 0.35} ${size * 0.35} 0 0 1 ${size * 0.82} ${size * 0.35}`}
             fill="none"
             stroke="#f97316"
-            strokeWidth={size * 0.08}
+            strokeWidth={size * 0.1}
             strokeLinecap="round"
-            mask="url(#gaugeMask)"
           />
           
-          {/* Red segment (87.5-100%) */}
+          {/* Red/Pink segment */}
           <path
-            d={`M ${size * 0.87} ${size * 0.43} A ${size * 0.4} ${size * 0.4} 0 0 1 ${size * 0.9} ${size * 0.5}`}
+            d={`M ${size * 0.84} ${size * 0.4} A ${size * 0.35} ${size * 0.35} 0 0 1 ${size * 0.85} ${size * 0.45}`}
             fill="none"
-            stroke="#ef4444"
-            strokeWidth={size * 0.08}
+            stroke="#ec4899"
+            strokeWidth={size * 0.1}
             strokeLinecap="round"
-            mask="url(#gaugeMask)"
           />
         </svg>
         
@@ -100,14 +82,14 @@ export const SpeedometerGauge = ({
         <div 
           className="absolute"
           style={{
-            width: size * 0.015,
-            height: size * 0.35,
+            width: size * 0.02,
+            height: size * 0.32,
             backgroundColor: '#1e293b',
             left: '50%',
-            bottom: 0,
+            bottom: size * 0.08,
             transformOrigin: 'bottom center',
             transform: `translateX(-50%) rotate(${needleRotation}deg)`,
-            borderRadius: `${size * 0.008}px ${size * 0.008}px 0 0`,
+            borderRadius: `${size * 0.01}px ${size * 0.01}px 0 0`,
             transition: 'transform 0.5s ease-out'
           }}
         />
@@ -116,16 +98,16 @@ export const SpeedometerGauge = ({
         <div 
           className="absolute bg-slate-800 rounded-full"
           style={{
-            width: size * 0.06,
-            height: size * 0.06,
+            width: size * 0.08,
+            height: size * 0.08,
             left: '50%',
-            bottom: -size * 0.03,
+            bottom: size * 0.04,
             transform: 'translateX(-50%)'
           }}
         />
         
         {/* Value display */}
-        <div className="absolute inset-0 flex flex-col items-center justify-end pb-2">
+        <div className="absolute inset-0 flex flex-col items-center justify-end pb-1">
           <div className="text-lg font-bold text-foreground">
             {displayValue}{unit}
           </div>
