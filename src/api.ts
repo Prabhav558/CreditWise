@@ -1,7 +1,7 @@
-import { supa } from "@/lib/supa";
+import { supabase } from "@/integrations/supabase/client";
 
 export async function askCreditWise(message: string) {
-  const { data, error } = await supa.functions.invoke("chat", {
+  const { data, error } = await supabase.functions.invoke("chat", {
     body: { message }
   });
   if (error) throw error;
