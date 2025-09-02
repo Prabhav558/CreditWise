@@ -445,7 +445,11 @@ const CreditRiskAnalyzer = () => {
                       </div>
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div 
-                          className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-500"
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            pdScore < 30 ? 'bg-gradient-to-r from-green-500 to-green-400' :
+                            pdScore < 60 ? 'bg-gradient-to-r from-yellow-500 to-yellow-400' :
+                            'bg-gradient-to-r from-red-500 to-red-400'
+                          }`}
                           style={{ 
                             width: `${Math.min((toNumber(selectedRow.avg_recharge_amt) / Math.max(1000, toNumber(selectedRow.avg_recharge_amt) * 1.5)) * 100, 100)}%` 
                           }}
@@ -464,7 +468,11 @@ const CreditRiskAnalyzer = () => {
                       </div>
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div 
-                          className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-500"
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            pdScore < 30 ? 'bg-gradient-to-r from-green-500 to-green-400' :
+                            pdScore < 60 ? 'bg-gradient-to-r from-yellow-500 to-yellow-400' :
+                            'bg-gradient-to-r from-red-500 to-red-400'
+                          }`}
                           style={{ 
                             width: `${Math.min((toNumber(selectedRow.avg_order_value) / Math.max(2000, toNumber(selectedRow.avg_order_value) * 1.5)) * 100, 100)}%` 
                           }}
@@ -483,7 +491,11 @@ const CreditRiskAnalyzer = () => {
                       </div>
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div 
-                          className="h-full bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-500"
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            pdScore < 30 ? 'bg-gradient-to-r from-green-500 to-green-400' :
+                            pdScore < 60 ? 'bg-gradient-to-r from-yellow-500 to-yellow-400' :
+                            'bg-gradient-to-r from-red-500 to-red-400'
+                          }`}
                           style={{ 
                             width: `${Math.min((toNumber(selectedRow.months_active) / Math.max(24, toNumber(selectedRow.months_active) * 1.5)) * 100, 100)}%` 
                           }}

@@ -32,71 +32,62 @@ export const SpeedometerGauge = ({
           viewBox={`0 0 ${size} ${size * 0.6}`}
           className="absolute inset-0"
         >
-          {/* Green segment */}
+          {/* Green segment (0-25%) */}
           <path
-            d={`M ${size * 0.15} ${size * 0.45} A ${size * 0.35} ${size * 0.35} 0 0 1 ${size * 0.3} ${size * 0.2}`}
+            d={`M ${size * 0.1} ${size * 0.5} A ${size * 0.4} ${size * 0.4} 0 0 1 ${size * 0.3} ${size * 0.18}`}
             fill="none"
             stroke="#22c55e"
-            strokeWidth={size * 0.1}
+            strokeWidth={size * 0.12}
             strokeLinecap="round"
           />
           
-          {/* Light Green segment */}
+          {/* Yellow segment (25-50%) */}
           <path
-            d={`M ${size * 0.35} ${size * 0.15} A ${size * 0.35} ${size * 0.35} 0 0 1 ${size * 0.5} ${size * 0.125}`}
+            d={`M ${size * 0.35} ${size * 0.15} A ${size * 0.4} ${size * 0.4} 0 0 1 ${size * 0.5} ${size * 0.1}`}
             fill="none"
-            stroke="#84cc16"
-            strokeWidth={size * 0.1}
+            stroke="#eab308"
+            strokeWidth={size * 0.12}
             strokeLinecap="round"
           />
           
-          {/* Yellow segment */}
+          {/* Orange segment (50-75%) */}
           <path
-            d={`M ${size * 0.55} ${size * 0.15} A ${size * 0.35} ${size * 0.35} 0 0 1 ${size * 0.7} ${size * 0.2}`}
-            fill="none"
-            stroke="#fbbf24"
-            strokeWidth={size * 0.1}
-            strokeLinecap="round"
-          />
-          
-          {/* Orange segment */}
-          <path
-            d={`M ${size * 0.75} ${size * 0.25} A ${size * 0.35} ${size * 0.35} 0 0 1 ${size * 0.82} ${size * 0.35}`}
+            d={`M ${size * 0.65} ${size * 0.15} A ${size * 0.4} ${size * 0.4} 0 0 1 ${size * 0.8} ${size * 0.3}`}
             fill="none"
             stroke="#f97316"
-            strokeWidth={size * 0.1}
+            strokeWidth={size * 0.12}
             strokeLinecap="round"
           />
           
-          {/* Red/Pink segment */}
+          {/* Red segment (75-100%) */}
           <path
-            d={`M ${size * 0.84} ${size * 0.4} A ${size * 0.35} ${size * 0.35} 0 0 1 ${size * 0.85} ${size * 0.45}`}
+            d={`M ${size * 0.82} ${size * 0.35} A ${size * 0.4} ${size * 0.4} 0 0 1 ${size * 0.9} ${size * 0.5}`}
             fill="none"
-            stroke="#ec4899"
-            strokeWidth={size * 0.1}
+            stroke="#ef4444"
+            strokeWidth={size * 0.12}
             strokeLinecap="round"
           />
         </svg>
         
-        {/* Needle */}
+        {/* Needle with circle end */}
         <div 
           className="absolute"
           style={{
-            width: size * 0.02,
-            height: size * 0.32,
-            backgroundColor: '#1e293b',
+            width: size * 0.025,
+            height: size * 0.35,
+            backgroundColor: '#1f2937',
             left: '50%',
             bottom: size * 0.08,
             transformOrigin: 'bottom center',
             transform: `translateX(-50%) rotate(${needleRotation}deg)`,
-            borderRadius: `${size * 0.01}px ${size * 0.01}px 0 0`,
+            borderRadius: `${size * 0.012}px`,
             transition: 'transform 0.5s ease-out'
           }}
         />
         
-        {/* Center dot */}
+        {/* Needle circle end */}
         <div 
-          className="absolute bg-slate-800 rounded-full"
+          className="absolute bg-gray-800 rounded-full border-2 border-white"
           style={{
             width: size * 0.08,
             height: size * 0.08,
