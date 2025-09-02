@@ -284,14 +284,15 @@ const CreditRiskAnalyzer = () => {
         fillColor = 'FFEF4444'; // red
       }
       
-      // Apply fill to entire row
-      worksheetRow.eachCell((cell) => {
-        cell.fill = {
+      // Apply fill only to pd_score cell
+      if (pdScoreColIndex > 0) {
+        const pdCell = worksheetRow.getCell(pdScoreColIndex);
+        pdCell.fill = {
           type: 'pattern',
           pattern: 'solid',
           fgColor: { argb: fillColor }
         };
-      });
+      }
     });
 
     // Auto-size columns
