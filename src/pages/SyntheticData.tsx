@@ -25,7 +25,50 @@ const SyntheticData = () => {
     if (meta) meta.setAttribute("content", "Generate synthetic credit data for testing and development with CreditWise.");
   }, []);
 
-  const generateRandomValue = (columnName: string, rowData: CSVData): any => {
+  const generateRandomValue = (columnName: string, allData: CSVData[], rowData: CSVData): any => {
+    // Get all existing values in this column (excluding empty ones)
+    const existingValues = allData
+      .map(row => row[columnName])
+      .filter(val => val !== null && val !== undefined && val !== '');
+    
+    if (existingValues.length === 0) {
+      // If no existing values, fall back to pattern-based generation
+      return generateFallbackValue(columnName, rowData);
+    }
+    
+    // Determine if column contains numeric or string data
+    const numericValues = existingValues
+      .filter(val => !isNaN(Number(val)))
+      .map(Number);
+    
+    const stringValues = existingValues
+      .filter(val => isNaN(Number(val)));
+    
+    // If mostly numeric, generate numeric value based on existing range
+    if (numericValues.length > stringValues.length && numericValues.length > 0) {
+      const min = Math.min(...numericValues);
+      const max = Math.max(...numericValues);
+      const avg = numericValues.reduce((a, b) => a + b, 0) / numericValues.length;
+      
+      // Generate value within realistic range (min to max with some variance)
+      const range = max - min;
+      const variance = range * 0.2; // 20% variance beyond range
+      const newMin = Math.max(0, min - variance);
+      const newMax = max + variance;
+      
+      return Math.floor(Math.random() * (newMax - newMin) + newMin);
+    }
+    
+    // If mostly string, pick random existing string value
+    if (stringValues.length > 0) {
+      return stringValues[Math.floor(Math.random() * stringValues.length)];
+    }
+    
+    // Mixed data, return random existing value
+    return existingValues[Math.floor(Math.random() * existingValues.length)];
+  };
+
+  const generateFallbackValue = (columnName: string, rowData: CSVData): any => {
     const column = columnName.toLowerCase();
     
     // Employment type based generation
@@ -72,26 +115,6 @@ const SyntheticData = () => {
     // Geographic/location variance
     if (column.includes('geo') || column.includes('location') || column.includes('variance')) {
       return (Math.random()).toFixed(2);
-    }
-    
-    // Default: try to infer from other row values
-    const numericValues = Object.values(rowData).filter(val => 
-      val !== null && val !== undefined && val !== '' && !isNaN(Number(val))
-    ).map(Number);
-    
-    if (numericValues.length > 0) {
-      const avg = numericValues.reduce((a, b) => a + b, 0) / numericValues.length;
-      const variance = avg * 0.2; // 20% variance
-      return Math.floor(avg + (Math.random() - 0.5) * variance);
-    }
-    
-    // String values
-    const stringValues = Object.values(rowData).filter(val => 
-      val !== null && val !== undefined && val !== '' && isNaN(Number(val))
-    );
-    
-    if (stringValues.length > 0) {
-      return stringValues[Math.floor(Math.random() * stringValues.length)];
     }
     
     // Fallback
@@ -149,7 +172,7 @@ const SyntheticData = () => {
         // Find empty cells and fill them
         Object.keys(newRow).forEach(key => {
           if (newRow[key] === null || newRow[key] === undefined || newRow[key] === '') {
-            newRow[key] = generateRandomValue(key, newRow);
+            newRow[key] = generateRandomValue(key, csvData, newRow);
           }
         });
         
