@@ -25,8 +25,16 @@ export const SpeedometerGauge = ({
   
   const centerX = size / 2;
   const centerY = size * 0.5;
-  const radius = size * 0.35;
-  const strokeWidth = size * 0.1;
+  const radius = size * 0.38;
+  const strokeWidth = size * 0.08;
+  
+  // Get colors based on percentage for dynamic theming
+  const getSegmentColor = (segmentPercentage: number) => {
+    if (segmentPercentage <= 25) return "hsl(142 76% 36%)"; // Green - safe
+    if (segmentPercentage <= 50) return "hsl(48 96% 53%)"; // Yellow - caution
+    if (segmentPercentage <= 75) return "hsl(25 95% 53%)"; // Orange - warning
+    return "hsl(0 84% 60%)"; // Red - danger
+  };
   
   // Create semicircle path
   const createArcPath = (startAngle: number, endAngle: number, r: number) => {
@@ -45,85 +53,79 @@ export const SpeedometerGauge = ({
   }
 
   return (
-    <div className="flex flex-col items-center space-y-4">
-      <div className="relative" style={{ width: size, height: size * 0.65, transform: 'rotate(-180deg)' }}>
+    <div className="flex flex-col items-center space-y-6">
+      <div className="relative" style={{ width: size, height: size * 0.65, transform: 'rotate(-90deg)' }}>
         <svg 
           width={size} 
           height={size * 0.65} 
           viewBox={`0 0 ${size} ${size * 0.65}`}
-          className="absolute inset-0"
+          className="absolute inset-0 drop-shadow-lg"
         >
           <defs>
-            {/* Gradient for the track */}
-            <linearGradient id="track-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#10b981" />
-              <stop offset="25%" stopColor="#f59e0b" />
-              <stop offset="50%" stopColor="#f97316" />
-              <stop offset="100%" stopColor="#ef4444" />
+            {/* Enhanced gradient definitions */}
+            <linearGradient id="track-bg" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="hsl(var(--muted))" />
+              <stop offset="100%" stopColor="hsl(var(--muted))" />
             </linearGradient>
             
-            {/* Shadow filter */}
-            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="hsl(var(--foreground))" floodOpacity="0.1"/>
+            <linearGradient id="segment-glow" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="hsl(var(--accent))" stopOpacity="0.3" />
+              <stop offset="50%" stopColor="hsl(var(--accent))" stopOpacity="0.1" />
+              <stop offset="100%" stopColor="hsl(var(--accent))" stopOpacity="0.3" />
+            </linearGradient>
+            
+            {/* Enhanced shadow and glow filters */}
+            <filter id="segment-shadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+              <feOffset dx="0" dy="2" result="offset"/>
+              <feComponentTransfer>
+                <feFuncA type="linear" slope="0.3"/>
+              </feComponentTransfer>
+              <feMerge> 
+                <feMergeNode/>
+                <feMergeNode in="SourceGraphic"/> 
+              </feMerge>
+            </filter>
+            
+            <filter id="needle-glow" x="-100%" y="-100%" width="300%" height="300%">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
             </filter>
           </defs>
           
-          {/* Background semicircle */}
+          {/* Background track with subtle gradient */}
           <path
             d={createArcPath(0, 180, radius)}
             fill="none"
-            stroke="hsl(var(--muted))"
+            stroke="hsl(var(--border))"
             strokeWidth={strokeWidth}
             strokeLinecap="round"
-            opacity="0.2"
+            opacity="0.3"
           />
           
-          {/* Colored track segments */}
-          {/* Green segment (0-25%) */}
+          {/* Active progress arc based on value */}
           <path
-            d={createArcPath(0, 45, radius)}
+            d={createArcPath(0, (percentage * 180) / 100, radius)}
             fill="none"
-            stroke="#10b981"
-            strokeWidth={strokeWidth * 0.8}
+            stroke={getSegmentColor(percentage)}
+            strokeWidth={strokeWidth * 0.9}
             strokeLinecap="round"
-            filter="url(#shadow)"
+            filter="url(#segment-shadow)"
+            style={{
+              transition: 'stroke-dasharray 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+              filter: 'drop-shadow(0 0 8px currentColor)',
+            }}
           />
           
-          {/* Yellow segment (25-50%) */}
-          <path
-            d={createArcPath(45, 90, radius)}
-            fill="none"
-            stroke="#f59e0b"
-            strokeWidth={strokeWidth * 0.8}
-            strokeLinecap="round"
-            filter="url(#shadow)"
-          />
-          
-          {/* Orange segment (50-75%) */}
-          <path
-            d={createArcPath(90, 135, radius)}
-            fill="none"
-            stroke="#f97316"
-            strokeWidth={strokeWidth * 0.8}
-            strokeLinecap="round"
-            filter="url(#shadow)"
-          />
-          
-          {/* Red segment (75-100%) */}
-          <path
-            d={createArcPath(135, 180, radius)}
-            fill="none"
-            stroke="#ef4444"
-            strokeWidth={strokeWidth * 0.8}
-            strokeLinecap="round"
-            filter="url(#shadow)"
-          />
-          
-          {/* Scale markers */}
-          {[0, 20, 40, 60, 80, 100].map((mark, index) => {
-            const angle = mark * 1.8; // 180 degrees / 100 = 1.8
-            const outerRadius = radius - strokeWidth * 0.3;
-            const innerRadius = radius - strokeWidth * 0.6;
+          {/* Enhanced scale markers */}
+          {[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((mark, index) => {
+            const angle = mark * 1.8;
+            const isMajor = mark % 25 === 0;
+            const outerRadius = radius - strokeWidth * 0.2;
+            const innerRadius = radius - strokeWidth * (isMajor ? 0.7 : 0.4);
             const pos1 = polarToCartesian(centerX, centerY, innerRadius, angle);
             const pos2 = polarToCartesian(centerX, centerY, outerRadius, angle);
             
@@ -135,26 +137,26 @@ export const SpeedometerGauge = ({
                 x2={pos2.x}
                 y2={pos2.y}
                 stroke="hsl(var(--muted-foreground))"
-                strokeWidth={size * 0.008}
-                opacity="0.8"
+                strokeWidth={isMajor ? size * 0.012 : size * 0.006}
+                opacity={isMajor ? "0.9" : "0.5"}
               />
             );
           })}
           
-          {/* Scale numbers */}
+          {/* Scale numbers with better typography */}
           {[0, 25, 50, 75, 100].map((mark, index) => {
             const angle = mark * 1.8;
-            const textRadius = radius - strokeWidth * 1.2;
+            const textRadius = radius - strokeWidth * 1.4;
             const pos = polarToCartesian(centerX, centerY, textRadius, angle);
             
             return (
               <text
                 key={index}
                 x={pos.x}
-                y={pos.y + size * 0.012}
+                y={pos.y + size * 0.015}
                 textAnchor="middle"
-                className="fill-muted-foreground text-xs font-medium"
-                style={{ fontSize: size * 0.08 }}
+                className="fill-muted-foreground font-semibold"
+                style={{ fontSize: size * 0.09 }}
               >
                 {mark}
               </text>
@@ -162,56 +164,62 @@ export const SpeedometerGauge = ({
           })}
         </svg>
         
-        {/* Needle */}
+        {/* Enhanced needle with glow effect */}
         <div 
-          className="absolute bg-foreground shadow-md"
+          className="absolute rounded-full"
           style={{
-            width: size * 0.015,
-            height: radius * 0.85,
+            width: size * 0.025,
+            height: radius * 0.9,
             left: '50%',
-            bottom: size * 0.1,
+            bottom: size * 0.08,
             transformOrigin: 'bottom center',
             transform: `translateX(-50%) rotate(${needleRotation}deg)`,
-            borderRadius: `${size * 0.008}px`,
-            transition: 'transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-            zIndex: 10
+            transition: 'transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            filter: 'drop-shadow(0 0 6px hsl(var(--accent) / 0.6))',
+            zIndex: 10,
+            background: `linear-gradient(to top, hsl(var(--accent)), hsl(var(--primary)))`
           }}
         />
         
-        {/* Center hub */}
+        {/* Enhanced center hub with gradient */}
         <div 
-          className="absolute bg-foreground rounded-full shadow-lg border-2 border-background"
+          className="absolute rounded-full border-2 border-background"
           style={{
-            width: size * 0.1,
-            height: size * 0.1,
+            width: size * 0.12,
+            height: size * 0.12,
             left: '50%',
-            bottom: size * 0.05,
+            bottom: size * 0.02,
             transform: 'translateX(-50%)',
+            background: `radial-gradient(circle, hsl(var(--accent)), hsl(var(--primary)))`,
+            boxShadow: 'var(--shadow-elegant)',
             zIndex: 20
           }}
         />
         
-        {/* Inner center dot */}
+        {/* Center accent ring */}
         <div 
-          className="absolute bg-background rounded-full"
+          className="absolute rounded-full border-2"
           style={{
-            width: size * 0.04,
-            height: size * 0.04,
+            width: size * 0.06,
+            height: size * 0.06,
             left: '50%',
-            bottom: size * 0.08,
+            bottom: size * 0.05,
             transform: 'translateX(-50%)',
+            borderColor: 'hsl(var(--background))',
+            background: 'hsl(var(--accent))',
             zIndex: 30
           }}
         />
       </div>
       
-      {/* Value display below the speedometer */}
-      <div className="text-lg font-bold text-foreground">
-        {displayValue}{unit}
-      </div>
-      
-      <div className="text-sm font-medium text-muted-foreground text-center">
-        {title}
+      {/* Enhanced value display */}
+      <div className="text-center space-y-2">
+        <div className="text-2xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+          {displayValue}{unit}
+        </div>
+        <div className="text-sm font-medium text-muted-foreground">
+          {title}
+        </div>
       </div>
     </div>
   );
