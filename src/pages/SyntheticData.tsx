@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import * as XLSX from "xlsx";
 import FloatingChatbot from "@/components/FloatingChatbot";
+import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -393,7 +394,8 @@ const SyntheticData = () => {
   };
 
   return (
-    <main className="container mx-auto px-4 py-8">
+    <div>
+      <main className="container mx-auto px-4 py-8">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-semibold mb-4">
@@ -519,7 +521,9 @@ const SyntheticData = () => {
         </div>
       </div>
       <FloatingChatbot />
-    </main>
+      </main>
+      <Footer />
+    </div>
   );
 };
 
