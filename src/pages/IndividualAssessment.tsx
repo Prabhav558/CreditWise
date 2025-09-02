@@ -391,7 +391,7 @@ const IndividualAssessment = () => {
                           }`}>
                             {assessment.risk_category}
                           </div>
-                          <span className="text-2xl font-bold">{assessment.risk_score}</span>
+                          <span className="text-2xl font-bold">{((assessment.risk_score / 850) * 100).toFixed(1)}%</span>
                         </div>
                         <span className="text-sm text-muted-foreground">
                           {new Date(assessment.timestamp).toLocaleDateString()}
