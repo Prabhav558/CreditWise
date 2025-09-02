@@ -25,158 +25,142 @@ const SyntheticData = () => {
     if (meta) meta.setAttribute("content", "Generate synthetic credit data for testing and development with CreditWise.");
   }, []);
 
-  // Comprehensive empty value detection
   const isEmptyValue = (value: any): boolean => {
-    if (value === null || value === undefined) return true;
-    if (typeof value === 'string') {
-      const trimmed = value.trim().toLowerCase();
-      return trimmed === '' || 
-             trimmed === 'empty' || 
-             trimmed === 'null' || 
-             trimmed === 'undefined' ||
-             trimmed === 'n/a' ||
-             trimmed === 'na' ||
-             trimmed === '-' ||
-             trimmed === '#n/a' ||
-             trimmed === '#null!' ||
-             trimmed === '#div/0!' ||
-             trimmed === '#value!' ||
-             trimmed === '#ref!' ||
-             trimmed === '#name?' ||
-             trimmed === '#num!';
-    }
-    return false;
+    return value === null || 
+           value === undefined || 
+           value === '' || 
+           value === 'empty' ||
+           (typeof value === 'string' && value.trim() === '');
   };
 
-  const analyzeColumnData = (columnName: string, allData: CSVData[]) => {
-    const validValues = allData
+  const generateRandomValue = (columnName: string, allData: CSVData[]): any => {
+    // Get all non-empty values in this column
+    const existingValues = allData
       .map(row => row[columnName])
       .filter(val => !isEmptyValue(val));
-
-    console.log(`Analyzing column "${columnName}": ${validValues.length} valid values out of ${allData.length} total`);
     
-    if (validValues.length === 0) {
-      return { type: 'unknown', values: [], stats: null };
+    console.log(`Generating value for column: ${columnName}, existing values:`, existingValues);
+    
+    if (existingValues.length === 0) {
+      // If no existing values, fall back to pattern-based generation
+      return generateFallbackValue(columnName);
     }
-
-    // Check if values are numeric
-    const numericValues = validValues
-      .map(val => {
-        const num = Number(val);
-        return isNaN(num) ? null : num;
-      })
-      .filter(val => val !== null);
-
-    const isNumeric = numericValues.length > validValues.length * 0.7; // 70% numeric threshold
-
-    if (isNumeric && numericValues.length > 0) {
+    
+    // Determine if column contains numeric or string data
+    const numericValues = existingValues
+      .filter(val => !isNaN(Number(val)) && val !== '')
+      .map(Number);
+    
+    const stringValues = existingValues
+      .filter(val => isNaN(Number(val)) || val === '');
+    
+    // If mostly numeric, generate numeric value based on existing range
+    if (numericValues.length > stringValues.length && numericValues.length > 0) {
       const min = Math.min(...numericValues);
       const max = Math.max(...numericValues);
       const avg = numericValues.reduce((a, b) => a + b, 0) / numericValues.length;
-      const hasDecimals = numericValues.some(val => !Number.isInteger(val));
       
-      return {
-        type: 'numeric',
-        values: numericValues,
-        stats: { min, max, avg, hasDecimals }
-      };
-    } else {
-      // Categorical/string data
-      const uniqueValues = [...new Set(validValues.map(val => String(val)))];
-      return {
-        type: 'categorical',
-        values: uniqueValues,
-        stats: { uniqueCount: uniqueValues.length }
-      };
-    }
-  };
-
-  const generateValueForColumn = (columnName: string, columnData: any): any => {
-    const column = columnName.toLowerCase();
-
-    if (columnData.type === 'numeric' && columnData.stats) {
-      const { min, max, avg, hasDecimals } = columnData.stats;
-      
-      // Generate within range with some variance
+      // Generate value within realistic range (±20% of existing range)
       const range = max - min;
-      const variance = Math.max(range * 0.2, 1); // At least 1 unit of variance
-      const minVal = Math.max(0, min - variance * 0.5);
-      const maxVal = max + variance * 0.5;
+      if (range === 0) {
+        // All values are the same, add small variance
+        return avg + (Math.random() - 0.5) * avg * 0.1;
+      }
       
-      const generated = Math.random() * (maxVal - minVal) + minVal;
+      const variance = range * 0.2;
+      const newMin = Math.max(0, min - variance);
+      const newMax = max + variance;
       
-      // Return integer if original data doesn't have decimals
-      return hasDecimals ? Math.round(generated * 100) / 100 : Math.round(generated);
+      const generatedValue = Math.random() * (newMax - newMin) + newMin;
+      
+      // If original values are integers, return integer
+      if (numericValues.every(val => Number.isInteger(val))) {
+        return Math.round(generatedValue);
+      }
+      
+      // If original values have decimals, match the precision
+      const decimalPlaces = Math.max(...numericValues.map(val => {
+        const str = val.toString();
+        const decimalIndex = str.indexOf('.');
+        return decimalIndex === -1 ? 0 : str.length - decimalIndex - 1;
+      }));
+      
+      return Number(generatedValue.toFixed(decimalPlaces));
     }
     
-    if (columnData.type === 'categorical' && columnData.values.length > 0) {
-      // Pick random existing value
-      return columnData.values[Math.floor(Math.random() * columnData.values.length)];
+    // If mostly string, pick random existing string value
+    if (stringValues.length > 0) {
+      return stringValues[Math.floor(Math.random() * stringValues.length)];
     }
-
-    // Fallback generation based on column name patterns
-    return generateFallbackValue(column);
+    
+    // Mixed data, return random existing value
+    return existingValues[Math.floor(Math.random() * existingValues.length)];
   };
 
   const generateFallbackValue = (columnName: string): any => {
     const column = columnName.toLowerCase();
     
-    // ID patterns
-    if (column.includes('id') || column.includes('user')) {
-      return `user_${String(Math.floor(Math.random() * 99999) + 1).padStart(5, '0')}`;
+    console.log(`Generating fallback value for column: ${columnName}`);
+    
+    // Employment type based generation
+    if (column.includes('employment') || column.includes('job') || column.includes('work')) {
+      const types = ['Employed', 'Self-employed', 'Unemployed', 'Student', 'Retired'];
+      return types[Math.floor(Math.random() * types.length)];
     }
     
-    // Age patterns
-    if (column.includes('age')) {
-      return Math.floor(Math.random() * 65) + 18; // 18-82 years
-    }
-    
-    // Location patterns
-    if (column.includes('location') || column.includes('city') || column.includes('place')) {
-      const locations = ['Urban', 'Suburban', 'Rural', 'Metropolitan', 'Downtown'];
+    // Location based
+    if (column.includes('location') || column.includes('city') || column.includes('address')) {
+      const locations = ['Urban', 'Suburban', 'Rural'];
       return locations[Math.floor(Math.random() * locations.length)];
     }
     
-    // Employment patterns
-    if (column.includes('employment') || column.includes('job') || column.includes('work') || column.includes('occupation')) {
-      const employmentTypes = ['Employed', 'Self-employed', 'Unemployed', 'Student', 'Retired', 'Freelancer'];
-      return employmentTypes[Math.floor(Math.random() * employmentTypes.length)];
+    // Financial amounts
+    if (column.includes('amount') || column.includes('salary') || column.includes('income') || column.includes('payment') || column.includes('recharge')) {
+      return Math.round((Math.random() * 1000 + 100) * 100) / 100; // Random amount between 100-1100 with 2 decimals
     }
     
-    // Financial/Amount patterns
-    if (column.includes('amount') || column.includes('salary') || column.includes('income') || 
-        column.includes('payment') || column.includes('recharge') || column.includes('value') ||
-        column.includes('price') || column.includes('cost')) {
-      return Math.round((Math.random() * 5000 + 100) * 100) / 100; // $100-$5100 with 2 decimals
+    // Frequency values
+    if (column.includes('freq') || column.includes('frequency')) {
+      return Math.floor(Math.random() * 20) + 1;
     }
     
-    // Rate/Ratio/Percentage patterns
-    if (column.includes('rate') || column.includes('ratio') || column.includes('percent') || 
-        column.includes('score') || column.includes('index')) {
-      return Math.round(Math.random() * 10000) / 100; // 0.00 to 100.00
+    // Ratios and percentages
+    if (column.includes('ratio') || column.includes('rate') || column.includes('percent')) {
+      return Math.round(Math.random() * 100) / 100; // 0.00 to 1.00
     }
     
-    // Frequency patterns
-    if (column.includes('freq') || column.includes('frequency') || column.includes('count')) {
-      return Math.floor(Math.random() * 50) + 1; // 1-50
+    // Days
+    if (column.includes('days') || column.includes('day')) {
+      return Math.floor(Math.random() * 365) + 1;
     }
     
-    // Time patterns
-    if (column.includes('day') || column.includes('days')) {
-      return Math.floor(Math.random() * 365) + 1; // 1-365 days
-    }
+    // Months
     if (column.includes('month') || column.includes('months')) {
-      return Math.floor(Math.random() * 60) + 1; // 1-60 months
+      return Math.floor(Math.random() * 60) + 1;
     }
     
-    // Status patterns
-    if (column.includes('status') || column.includes('state')) {
-      const statuses = ['Active', 'Inactive', 'Pending', 'Approved', 'Rejected'];
-      return statuses[Math.floor(Math.random() * statuses.length)];
+    // Age
+    if (column.includes('age')) {
+      return Math.floor(Math.random() * 50) + 18;
     }
     
-    // Default numeric value
-    return Math.floor(Math.random() * 1000) + 1;
+    // Score values
+    if (column.includes('score')) {
+      return Math.floor(Math.random() * 850) + 300;
+    }
+    
+    // ID values
+    if (column.includes('id') || column.includes('user')) {
+      return `user_${String(Math.floor(Math.random() * 10000)).padStart(5, '0')}`;
+    }
+    
+    // Geographic/location variance
+    if (column.includes('geo') || column.includes('variance')) {
+      return Math.round(Math.random() * 100) / 100;
+    }
+    
+    // Default: generate a reasonable numeric value
+    return Math.floor(Math.random() * 100) + 1;
   };
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -184,7 +168,6 @@ const SyntheticData = () => {
     if (!file) return;
 
     setFileName(file.name);
-    setProcessedData([]); // Clear previous processed data
     const reader = new FileReader();
     
     reader.onload = (e) => {
@@ -193,17 +176,14 @@ const SyntheticData = () => {
         const workbook = XLSX.read(data, { type: 'array' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' }); // Use empty string as default
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
         
-        console.log('Raw data loaded:', jsonData);
         setCsvData(jsonData as CSVData[]);
-        
         toast({
           title: "File Uploaded",
           description: `Successfully loaded ${jsonData.length} rows from ${file.name}`,
         });
       } catch (error) {
-        console.error('Upload error:', error);
         toast({
           title: "Upload Failed",
           description: "Please upload a valid CSV or Excel file.",
@@ -225,64 +205,39 @@ const SyntheticData = () => {
       return;
     }
 
-    console.log('Starting data processing...');
     setIsProcessing(true);
     
     setTimeout(() => {
-      try {
-        // Get all column names from the first row
-        const columns = Object.keys(csvData[0] || {});
-        console.log('Columns found:', columns);
+      let emptyCellsCount = 0;
+      let filledCellsCount = 0;
+      
+      const processed = csvData.map((row, rowIndex) => {
+        const newRow = { ...row };
         
-        // Analyze each column
-        const columnAnalysis: { [key: string]: any } = {};
-        columns.forEach(column => {
-          columnAnalysis[column] = analyzeColumnData(column, csvData);
+        // Find empty cells and fill them
+        Object.keys(newRow).forEach(key => {
+          if (isEmptyValue(newRow[key])) {
+            emptyCellsCount++;
+            const generatedValue = generateRandomValue(key, csvData);
+            newRow[key] = generatedValue;
+            filledCellsCount++;
+            console.log(`Filled empty cell in row ${rowIndex}, column ${key} with value: ${generatedValue}`);
+          }
         });
         
-        console.log('Column analysis:', columnAnalysis);
-        
-        let totalEmptyCells = 0;
-        let totalFilledCells = 0;
-        
-        // Process each row
-        const processed = csvData.map((row, rowIndex) => {
-          const newRow = { ...row };
-          
-          // Check each column in this row
-          columns.forEach(column => {
-            const currentValue = newRow[column];
-            if (isEmptyValue(currentValue)) {
-              totalEmptyCells++;
-              const generatedValue = generateValueForColumn(column, columnAnalysis[column]);
-              newRow[column] = generatedValue;
-              totalFilledCells++;
-              console.log(`Row ${rowIndex}, Column "${column}": "${currentValue}" -> "${generatedValue}"`);
-            }
-          });
-          
-          return newRow;
-        });
-        
-        console.log(`Processing complete: Found ${totalEmptyCells} empty cells, filled ${totalFilledCells} cells`);
-        
-        setProcessedData(processed);
-        setIsProcessing(false);
-        
-        toast({
-          title: "Processing Complete",
-          description: `Filled ${totalFilledCells} empty cells in ${processed.length} rows`,
-        });
-      } catch (error) {
-        console.error('Processing error:', error);
-        setIsProcessing(false);
-        toast({
-          title: "Processing Failed",
-          description: "An error occurred while processing the data.",
-          variant: "destructive",
-        });
-      }
-    }, 1000); // Reduced timeout for faster feedback
+        return newRow;
+      });
+      
+      console.log(`Processing complete. Found ${emptyCellsCount} empty cells, filled ${filledCellsCount} cells`);
+      
+      setProcessedData(processed);
+      setIsProcessing(false);
+      
+      toast({
+        title: "Processing Complete",
+        description: `Filled ${filledCellsCount} empty cells in ${processed.length} rows`,
+      });
+    }, 2000);
   };
 
   const downloadProcessedData = () => {
@@ -311,9 +266,11 @@ const SyntheticData = () => {
   const DataTable = ({ data, title }: { data: CSVData[], title: string }) => {
     const [currentRowPage, setCurrentRowPage] = useState(0);
     const [horizontalScroll, setHorizontalScroll] = useState(0);
+    const horizontalScrollRef = useRef<HTMLDivElement>(null);
+    const verticalScrollRef = useRef<HTMLDivElement>(null);
     
     const rowsPerPage = 6;
-    const maxVisibleColumns = 4;
+    const maxVisibleColumns = 4; // Show only 4 columns initially
     
     if (data.length === 0) return null;
 
@@ -343,13 +300,6 @@ const SyntheticData = () => {
       }
     };
 
-    // Count empty cells in visible data for debugging
-    const emptyCellsInVisible = currentRows.reduce((count, row) => {
-      return count + visibleColumns.reduce((cellCount, col) => {
-        return cellCount + (isEmptyValue(row[col]) ? 1 : 0);
-      }, 0);
-    }, 0);
-
     return (
       <div className="w-full max-w-full">
         {/* Header with navigation controls */}
@@ -359,11 +309,6 @@ const SyntheticData = () => {
             <span className="text-sm text-muted-foreground">
               {data.length} rows • {columns.length} columns
             </span>
-            {title.includes("Preview") && emptyCellsInVisible > 0 && (
-              <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded">
-                {emptyCellsInVisible} empty cells visible
-              </span>
-            )}
           </div>
           
           {/* Navigation Controls */}
@@ -558,7 +503,7 @@ const SyntheticData = () => {
                 Upload CSV File
               </CardTitle>
               <p className="text-muted-foreground">
-                Upload a CSV or Excel file with missing data. Our AI will intelligently fill empty cells based on existing column patterns.
+                Upload a CSV or Excel file with missing data. Our AI will intelligently fill empty cells based on row context.
               </p>
             </CardHeader>
             <CardContent>
@@ -641,19 +586,19 @@ const SyntheticData = () => {
                 <div>
                   <h4 className="font-semibold mb-2">Smart Data Filling</h4>
                   <ul className="space-y-1 text-sm text-muted-foreground">
-                    <li>• Detects all types of empty values (null, empty, N/A, etc.)</li>
-                    <li>• Analyzes existing values in each column for patterns</li>
-                    <li>• Generates realistic values within appropriate ranges</li>
+                    <li>• Analyzes existing values in each column</li>
+                    <li>• Generates values within realistic ranges for numeric data</li>
+                    <li>• Selects from existing categorical values for text data</li>
                     <li>• Maintains data consistency and relationships</li>
                   </ul>
                 </div>
                 <div>
-                  <h4 className="font-semibold mb-2">Detection Capabilities</h4>
+                  <h4 className="font-semibold mb-2">Supported Patterns</h4>
                   <ul className="space-y-1 text-sm text-muted-foreground">
-                    <li>• Empty strings, null, undefined values</li>
-                    <li>• Excel error values (#N/A, #NULL!, etc.)</li>
-                    <li>• Common empty indicators (-, N/A, empty)</li>
-                    <li>• Numeric vs categorical data types</li>
+                    <li>• Employment types and job categories</li>
+                    <li>• Financial amounts and payment data</li>
+                    <li>• Ratios, percentages, and scores</li>
+                    <li>• Time-based values (days, months)</li>
                   </ul>
                 </div>
               </div>
