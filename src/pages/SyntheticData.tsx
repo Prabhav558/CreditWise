@@ -314,7 +314,7 @@ const SyntheticData = () => {
     const columns = Object.keys(data[0] || {});
 
     return (
-      <div className="w-full max-w-full">
+      <div className="w-full max-w-full overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between mb-4 gap-4">
           <div className="flex items-center gap-4">
@@ -326,7 +326,7 @@ const SyntheticData = () => {
         </div>
 
         {/* Table Container with native scrolling */}
-        <div className="border rounded-lg bg-background w-full h-96 overflow-auto">
+        <div className="border rounded-lg bg-background w-full max-w-full h-96 overflow-auto">
           <table className="min-w-max border-collapse text-sm">
             {/* Header */}
             <thead className="bg-muted/50 sticky top-0 z-10">
