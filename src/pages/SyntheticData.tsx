@@ -325,64 +325,58 @@ const SyntheticData = () => {
           </div>
         </div>
 
-        {/* Table Container with native scrolling */}
-        <div className="border rounded-lg bg-background w-full h-96">
-  {/* Horizontal scroll wrapper */}
-  <div className="w-full h-full overflow-x-auto overflow-y-hidden">
-    {/* Vertical scroll wrapper */}
-    <div className="h-full overflow-y-auto">
-      <table className="border-collapse text-sm min-w-max">
-        {/* Header */}
-        <thead className="bg-muted/50 sticky top-0 z-10">
-          <tr>
-            {columns.map((header, index) => (
-              <th
-                key={`${header}-${index}`}
-                className="text-left p-3 border-b font-medium bg-muted/50 min-w-[200px]"
-              >
-                <div className="font-semibold" title={header}>
-                  {header}
-                </div>
-              </th>
-            ))}
-          </tr>
-        </thead>
-
-        {/* Body */}
-        <tbody>
-          {data.map((row, rowIndex) => (
-            <tr
-              key={`row-${rowIndex}`}
-              className="border-b hover:bg-muted/25 transition-colors"
-            >
-              {columns.map((column, colIndex) => {
-                const value = row[column];
-                const isEmpty = isEmptyValue(value);
-                return (
-                  <td
-                    key={`cell-${colIndex}`}
-                    className="p-3 border-r border-border/30"
+        {/* Table Container with scrolling */}
+        <div className="border rounded-lg bg-background w-full h-96 overflow-auto whitespace-nowrap">
+          <table className="border-collapse text-sm min-w-max">
+            {/* Header */}
+            <thead className="bg-muted/50 sticky top-0 z-10">
+              <tr>
+                {columns.map((header, index) => (
+                  <th
+                    key={`${header}-${index}`}
+                    className="text-left p-3 border-b font-medium bg-muted/50 min-w-[200px]"
                   >
-                    {isEmpty ? (
-                      <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-destructive/10 text-destructive font-medium">
-                        empty
-                      </span>
-                    ) : (
-                      <div className="max-w-[180px]" title={String(value)}>
-                        {String(value)}
-                      </div>
-                    )}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
+                    <div className="font-semibold" title={header}>
+                      {header}
+                    </div>
+                  </th>
+                ))}
+              </tr>
+            </thead>
 
+            {/* Body */}
+            <tbody>
+              {data.map((row, rowIndex) => (
+                <tr
+                  key={`row-${rowIndex}`}
+                  className="border-b hover:bg-muted/25 transition-colors"
+                >
+                  {columns.map((column, colIndex) => {
+                    const value = row[column];
+                    const isEmpty = isEmptyValue(value);
+                    return (
+                      <td
+                        key={`cell-${colIndex}`}
+                        className="p-3 border-r border-border/30"
+                      >
+                        {isEmpty ? (
+                          <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-destructive/10 text-destructive font-medium">
+                            empty
+                          </span>
+                        ) : (
+                          <div className="max-w-[180px]" title={String(value)}>
+                            {String(value)}
+                          </div>
+                        )}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     );
   };
 
