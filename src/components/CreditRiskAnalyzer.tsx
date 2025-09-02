@@ -236,6 +236,33 @@ const CreditRiskAnalyzer = () => {
 
     // Convert to worksheet
     const worksheet = XLSX.utils.json_to_sheet(updatedData);
+    
+    // Add color formatting based on pd_score
+    const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
+    const pdScoreColIndex = Object.keys(updatedData[0]).indexOf('pd_score');
+    
+    // Create styles for color coding
+    const styles = {};
+    for (let rowNum = range.s.r + 1; rowNum <= range.e.r; rowNum++) {
+      const cellAddress = XLSX.utils.encode_cell({ r: rowNum, c: pdScoreColIndex });
+      const cellValue = worksheet[cellAddress]?.v;
+      
+      if (typeof cellValue === 'number') {
+        let fillColor;
+        if (cellValue >= 0 && cellValue <= 20) {
+          fillColor = { fgColor: { rgb: "22C55E" } }; // green
+        } else if (cellValue > 20 && cellValue <= 80) {
+          fillColor = { fgColor: { rgb: "EAB308" } }; // yellow
+        } else if (cellValue > 80 && cellValue <= 100) {
+          fillColor = { fgColor: { rgb: "EF4444" } }; // red
+        }
+        
+        if (fillColor) {
+          worksheet[cellAddress].s = { fill: fillColor };
+        }
+      }
+    }
+    
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Risk Analysis");
 
