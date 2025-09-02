@@ -1,6 +1,7 @@
 import Hero from "@/components/Hero";
 import CreditRiskAnalyzer from "@/components/CreditRiskAnalyzer";
 import FloatingChatbot from "@/components/FloatingChatbot";
+import Footer from "@/components/Footer";
 import { useEffect } from "react";
 
 const DefaulterTracking = () => {
@@ -19,6 +20,7 @@ const DefaulterTracking = () => {
         </div>
       </section>
       <FloatingChatbot />
+      <Footer />
     </main>
   );
 };
