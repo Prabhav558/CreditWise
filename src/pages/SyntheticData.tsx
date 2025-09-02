@@ -263,42 +263,40 @@ const SyntheticData = () => {
                   
                    {/* Data Preview */}
                   <div className="border rounded-lg overflow-hidden">
-                    <ScrollArea className="h-80 w-full overflow-auto">
-                      <div className="min-w-max w-fit">
-                        <table className="text-sm border-collapse">
-                          <thead className="bg-muted/50 sticky top-0 z-10">
-                            <tr>
-                              {Object.keys(csvData[0] || {}).map((header) => (
-                                <th key={header} className="text-left p-3 border-b font-medium whitespace-nowrap w-[200px] min-w-[200px]">
-                                  <div className="truncate" title={header}>
-                                    {header}
-                                  </div>
-                                </th>
+                    <div className="w-full overflow-x-auto overflow-y-auto max-h-80">
+                      <table className="text-sm border-collapse min-w-full">
+                        <thead className="bg-muted/50 sticky top-0 z-10">
+                          <tr>
+                            {Object.keys(csvData[0] || {}).map((header) => (
+                              <th key={header} className="text-left p-3 border-b font-medium whitespace-nowrap min-w-[150px]">
+                                <div className="truncate max-w-[150px]" title={header}>
+                                  {header}
+                                </div>
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {csvData.map((row, index) => (
+                            <tr key={index} className="border-b hover:bg-muted/25 transition-colors">
+                              {Object.values(row).map((value, cellIndex) => (
+                                <td key={cellIndex} className="p-3 min-w-[150px] border-r border-border/50">
+                                  {value === null || value === undefined || value === '' ? (
+                                    <span className="text-muted-foreground italic bg-destructive/10 px-2 py-1 rounded text-xs whitespace-nowrap">
+                                      empty
+                                    </span>
+                                  ) : (
+                                    <div className="text-foreground truncate max-w-[150px]" title={String(value)}>
+                                      {String(value)}
+                                    </div>
+                                  )}
+                                </td>
                               ))}
                             </tr>
-                          </thead>
-                          <tbody>
-                            {csvData.map((row, index) => (
-                              <tr key={index} className="border-b hover:bg-muted/25 transition-colors">
-                                {Object.values(row).map((value, cellIndex) => (
-                                  <td key={cellIndex} className="p-3 w-[200px] min-w-[200px] border-r border-border/50">
-                                    {value === null || value === undefined || value === '' ? (
-                                      <span className="text-muted-foreground italic bg-destructive/10 px-2 py-1 rounded text-xs whitespace-nowrap">
-                                        empty
-                                      </span>
-                                    ) : (
-                                      <div className="text-foreground truncate" title={String(value)}>
-                                        {String(value)}
-                                      </div>
-                                    )}
-                                  </td>
-                                ))}
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </ScrollArea>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                     <div className="p-2 text-center text-sm text-muted-foreground bg-muted/20 border-t">
                       Showing all {csvData.length} rows • Scroll to view more data
                     </div>
@@ -325,36 +323,34 @@ const SyntheticData = () => {
               </CardHeader>
               <CardContent>
                 <div className="border rounded-lg overflow-hidden">
-                  <ScrollArea className="h-80 w-full overflow-auto">
-                    <div className="min-w-max w-fit">
-                      <table className="text-sm border-collapse">
-                        <thead className="bg-muted/50 sticky top-0 z-10">
-                          <tr>
-                            {Object.keys(processedData[0] || {}).map((header) => (
-                              <th key={header} className="text-left p-3 border-b font-medium whitespace-nowrap w-[200px] min-w-[200px]">
-                                <div className="truncate" title={header}>
-                                  {header}
+                  <div className="w-full overflow-x-auto overflow-y-auto max-h-80">
+                    <table className="text-sm border-collapse min-w-full">
+                      <thead className="bg-muted/50 sticky top-0 z-10">
+                        <tr>
+                          {Object.keys(processedData[0] || {}).map((header) => (
+                            <th key={header} className="text-left p-3 border-b font-medium whitespace-nowrap min-w-[150px]">
+                              <div className="truncate max-w-[150px]" title={header}>
+                                {header}
+                              </div>
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {processedData.map((row, index) => (
+                          <tr key={index} className="border-b hover:bg-muted/25 transition-colors">
+                            {Object.values(row).map((value, cellIndex) => (
+                              <td key={cellIndex} className="p-3 min-w-[150px] border-r border-border/50">
+                                <div className="text-foreground truncate max-w-[150px]" title={String(value)}>
+                                  {String(value)}
                                 </div>
-                              </th>
+                              </td>
                             ))}
                           </tr>
-                        </thead>
-                        <tbody>
-                          {processedData.map((row, index) => (
-                            <tr key={index} className="border-b hover:bg-muted/25 transition-colors">
-                              {Object.values(row).map((value, cellIndex) => (
-                                <td key={cellIndex} className="p-3 w-[200px] min-w-[200px] border-r border-border/50">
-                                  <div className="text-foreground truncate" title={String(value)}>
-                                    {String(value)}
-                                  </div>
-                                </td>
-                              ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </ScrollArea>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                   <div className="p-2 text-center text-sm text-muted-foreground bg-muted/20 border-t">
                     Showing all {processedData.length} processed rows • Scroll horizontally and vertically to view all data
                   </div>
