@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useToast } from "@/hooks/use-toast";
-import { Download, Upload, FileSpreadsheet, RefreshCw } from "lucide-react";
+import { Download, Upload, FileSpreadsheet, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
 
 interface CSVData {
   [key: string]: any;
@@ -189,9 +189,152 @@ const SyntheticData = () => {
     });
   };
 
+  const DataTable = ({ data, title }: { data: CSVData[], title: string }) => {
+    const [scrollPosition, setScrollPosition] = useState(0);
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const [canScrollLeft, setCanScrollLeft] = useState(false);
+    const [canScrollRight, setCanScrollRight] = useState(false);
+
+    const checkScrollButtons = () => {
+      if (scrollContainerRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+        setCanScrollLeft(scrollLeft > 0);
+        setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 1);
+      }
+    };
+
+    useEffect(() => {
+      checkScrollButtons();
+      const container = scrollContainerRef.current;
+      if (container) {
+        container.addEventListener('scroll', checkScrollButtons);
+        return () => container.removeEventListener('scroll', checkScrollButtons);
+      }
+    }, [data]);
+
+    const scroll = (direction: 'left' | 'right') => {
+      if (scrollContainerRef.current) {
+        const scrollAmount = 300;
+        const newScrollLeft = direction === 'left' 
+          ? scrollContainerRef.current.scrollLeft - scrollAmount
+          : scrollContainerRef.current.scrollLeft + scrollAmount;
+        
+        scrollContainerRef.current.scrollTo({
+          left: newScrollLeft,
+          behavior: 'smooth'
+        });
+      }
+    };
+
+    if (data.length === 0) return null;
+
+    return (
+      <div className="relative">
+        {/* Scroll indicators */}
+        <div className="flex items-center justify-between mb-2">
+          <p className="text-sm text-muted-foreground">
+            {title} • {data.length} rows • {Object.keys(data[0] || {}).length} columns
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => scroll('left')}
+              disabled={!canScrollLeft}
+              className="h-8 w-8 p-0"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => scroll('right')}
+              disabled={!canScrollRight}
+              className="h-8 w-8 p-0"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Table container with strict width constraints */}
+        <div className="border rounded-lg overflow-hidden bg-background">
+          <div 
+            ref={scrollContainerRef}
+            className="overflow-x-auto overflow-y-hidden"
+            style={{ maxWidth: '100%' }}
+            onScroll={checkScrollButtons}
+          >
+            <div className="min-w-max">
+              <table className="border-collapse w-full text-sm">
+                <thead className="bg-muted/50 sticky top-0 z-10">
+                  <tr>
+                    {Object.keys(data[0] || {}).map((header) => (
+                      <th key={header} className="text-left p-3 border-b font-medium bg-muted/50">
+                        <div 
+                          className="w-[140px] truncate font-semibold" 
+                          title={header}
+                        >
+                          {header}
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.slice(0, 10).map((row, index) => (
+                    <tr key={index} className="border-b hover:bg-muted/25 transition-colors">
+                      {Object.values(row).map((value, cellIndex) => (
+                        <td key={cellIndex} className="p-3 border-r border-border/30">
+                          {value === null || value === undefined || value === '' ? (
+                            <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-destructive/10 text-destructive font-medium">
+                              empty
+                            </span>
+                          ) : (
+                            <div 
+                              className="w-[140px] text-foreground truncate" 
+                              title={String(value)}
+                            >
+                              {String(value)}
+                            </div>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Enhanced scroll indicator footer */}
+          <div className="flex items-center justify-between p-3 bg-muted/20 border-t text-sm text-muted-foreground">
+            <span>Showing first 10 of {data.length} rows</span>
+            <div className="flex items-center gap-2">
+              <span className="hidden sm:inline">Use scroll buttons or drag to view all columns</span>
+              <div className="flex items-center gap-1">
+                <div className={`w-2 h-2 rounded-full ${canScrollLeft ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+                <div className="w-8 h-1 bg-muted-foreground/30 rounded-full relative overflow-hidden">
+                  <div 
+                    className="h-full bg-primary rounded-full transition-all duration-300"
+                    style={{ 
+                      width: '30%',
+                      transform: `translateX(${scrollPosition}%)` 
+                    }}
+                  />
+                </div>
+                <div className={`w-2 h-2 rounded-full ${canScrollRight ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <main className="container mx-auto px-4 py-8">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-full mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl md:text-4xl font-semibold mb-4">
             <span className="bg-gradient-primary bg-clip-text text-transparent">
@@ -248,9 +391,7 @@ const SyntheticData = () => {
               {csvData.length > 0 && (
                 <div className="mt-6">
                   <div className="flex items-center justify-between mb-4">
-                    <p className="text-sm text-muted-foreground">
-                      Loaded {csvData.length} rows with {Object.keys(csvData[0] || {}).length} columns
-                    </p>
+                    <h3 className="text-lg font-semibold">Data Preview</h3>
                     <Button 
                       onClick={processData}
                       disabled={isProcessing}
@@ -261,46 +402,7 @@ const SyntheticData = () => {
                     </Button>
                   </div>
                   
-                   {/* Data Preview */}
-                  <div className="border rounded-lg overflow-hidden">
-                    <div className="w-full overflow-x-auto overflow-y-auto max-h-80">
-                      <table className="text-sm border-collapse min-w-full">
-                        <thead className="bg-muted/50 sticky top-0 z-10">
-                          <tr>
-                            {Object.keys(csvData[0] || {}).map((header) => (
-                              <th key={header} className="text-left p-3 border-b font-medium whitespace-nowrap min-w-[150px]">
-                                <div className="truncate max-w-[150px]" title={header}>
-                                  {header}
-                                </div>
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {csvData.map((row, index) => (
-                            <tr key={index} className="border-b hover:bg-muted/25 transition-colors">
-                              {Object.values(row).map((value, cellIndex) => (
-                                <td key={cellIndex} className="p-3 min-w-[150px] border-r border-border/50">
-                                  {value === null || value === undefined || value === '' ? (
-                                    <span className="text-muted-foreground italic bg-destructive/10 px-2 py-1 rounded text-xs whitespace-nowrap">
-                                      empty
-                                    </span>
-                                  ) : (
-                                    <div className="text-foreground truncate max-w-[150px]" title={String(value)}>
-                                      {String(value)}
-                                    </div>
-                                  )}
-                                </td>
-                              ))}
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                    <div className="p-2 text-center text-sm text-muted-foreground bg-muted/20 border-t">
-                      Showing all {csvData.length} rows • Scroll to view more data
-                    </div>
-                  </div>
+                  <DataTable data={csvData} title="Original Data" />
                 </div>
               )}
             </CardContent>
@@ -322,39 +424,7 @@ const SyntheticData = () => {
                 </Button>
               </CardHeader>
               <CardContent>
-                <div className="border rounded-lg overflow-hidden">
-                  <div className="w-full overflow-x-auto overflow-y-auto max-h-80">
-                    <table className="text-sm border-collapse min-w-full">
-                      <thead className="bg-muted/50 sticky top-0 z-10">
-                        <tr>
-                          {Object.keys(processedData[0] || {}).map((header) => (
-                            <th key={header} className="text-left p-3 border-b font-medium whitespace-nowrap min-w-[150px]">
-                              <div className="truncate max-w-[150px]" title={header}>
-                                {header}
-                              </div>
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {processedData.map((row, index) => (
-                          <tr key={index} className="border-b hover:bg-muted/25 transition-colors">
-                            {Object.values(row).map((value, cellIndex) => (
-                              <td key={cellIndex} className="p-3 min-w-[150px] border-r border-border/50">
-                                <div className="text-foreground truncate max-w-[150px]" title={String(value)}>
-                                  {String(value)}
-                                </div>
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  <div className="p-2 text-center text-sm text-muted-foreground bg-muted/20 border-t">
-                    Showing all {processedData.length} processed rows • Scroll horizontally and vertically to view all data
-                  </div>
-                </div>
+                <DataTable data={processedData} title="Processed Data" />
               </CardContent>
             </Card>
           )}
