@@ -386,7 +386,7 @@ const CreditRiskAnalyzer = () => {
                 <div className="text-center space-y-4">
                   <div className="space-y-2">
                     <h2 className="text-2xl font-bold">Risk Assessment Dashboard</h2>
-                    <div className="flex items-center justify-center gap-4">
+                    <div className="flex flex-col items-center justify-center space-y-2">
                       <div className="text-5xl font-bold text-foreground">{pdScore.toFixed(1)}%</div>
                       {risk && (
                         <Badge 
