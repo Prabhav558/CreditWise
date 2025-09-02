@@ -90,10 +90,12 @@ export default function FloatingChatbot() {
       {!isOpen && (
         <Button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 bg-primary hover:bg-primary/90 z-50"
+          className="fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 bg-gradient-to-br from-purple-500 to-blue-600 hover:from-purple-600 hover:to-blue-700 z-50 p-0 border-2 border-white/20"
           size="icon"
         >
-          <MessageCircle className="w-6 h-6" />
+          <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+            <MessageCircle className="w-5 h-5 text-purple-600" />
+          </div>
         </Button>
       )}
 
