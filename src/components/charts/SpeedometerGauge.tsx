@@ -1,160 +1,138 @@
 import React from "react";
 
 interface GaugeSegment {
-  start: number; // start (in domain units, NOT percent)
-  end: number;   // end (in domain units)
+  start: number; // percentage start (0-100)
+  end: number;   // percentage end (0-100)
   color: string;
 }
 
 interface SpeedometerGaugeProps {
-  value: number;          // current raw value (same scale as max)
-  max: number;            // domain maximum (e.g. 100 or 1)
+  value: number;
+  max: number;
   title: string;
-  unit?: string;          // display unit, default '%'
-  size?: number;          // overall width (px)
-  segments?: GaugeSegment[];
-  tickCount?: number;     // how many tick labels (including min & max)
+  unit?: string;
+  size?: number;              // overall width of the SVG viewport
+  ticks?: number[];           // tick labels in percentage (0-100 scale)
+  segments?: GaugeSegment[];  // custom segments (must span 0..100 in order)
   showValue?: boolean;
-  valueAsFraction?: boolean; // if true, value is already 0..1 and max ignored for % display
 }
 
-/**
- * Fully dynamic speedometer:
- * - Works for max = 100 (0..100) and max = 1 (0..1) seamlessly.
- * - Auto builds 4 color segments spanning the full domain if none provided.
- * - Generates evenly spaced ticks across the full domain (not capped at 50 anymore).
- * - Correct central geometry; needle pivots at true center; full 180° sweep covers entire domain.
- */
 export const SpeedometerGauge: React.FC<SpeedometerGaugeProps> = ({
   value,
   max,
   title,
   unit = "%",
-  size = 170,
-  segments,
-  tickCount = 5,
-  showValue = true,
-  valueAsFraction
+  size = 160,
+  ticks = [0, 25, 50],
+  segments = [
+    { start: 0,  end: 25, color: "#22c55e" },  // green
+    { start: 25, end: 50, color: "#eab308" },  // yellow
+    { start: 50, end: 75, color: "#f97316" },  // orange
+    { start: 75, end: 100, color: "#ef4444" }  // red
+  ],
+  showValue = true
 }) => {
-  // Defensive domain
+  // Defensive value normalization
   const safeMax = (!isNaN(max) && isFinite(max) && max > 0) ? max : 1;
-  const clampedValue = Math.min(Math.max(value, 0), safeMax);
+  const safeValue = (!isNaN(value) && isFinite(value) && value >= 0) ? value : 0;
+  const percentage = Math.min((safeValue / safeMax) * 100, 100);
 
-  // Determine fraction (0..1) of domain covered
-  const fraction = valueAsFraction ? Math.min(Math.max(value, 0), 1) : (clampedValue / safeMax);
-  const percent = fraction * 100;
-
-  // Display formatting
-  let displayValue: string;
-  if (unit === "%") {
-    // If domain is 0..1 (max <= 1.00001) OR explicitly valueAsFraction, treat value as fraction
-    const frac = (safeMax <= 1.000001 || valueAsFraction) ? clampedValue : (clampedValue / safeMax);
-    displayValue = (frac * 100).toFixed(1);
-  } else {
-    // Numeric display respecting magnitude
-    displayValue = (safeMax <= 1 ? clampedValue.toFixed(2) : clampedValue.toFixed(1));
-  }
+  // Display value (if unit = % we assume incoming value is fractional, e.g. 0.667)
+  const displayValue = unit === "%" ? (safeValue * 100).toFixed(1) : safeValue.toFixed(2);
 
   // Geometry
-  const strokeWidth = size * 0.14;                       // arc thickness
-  const radius = (size / 2) - strokeWidth * 1.1;         // radius inside viewBox
+  const strokeWidth = size * 0.14;                  // arc thickness
+  const radius = (size / 2) - strokeWidth * 1.1;    // ensure stroke stays inside
   const centerX = size / 2;
-  const centerY = radius + strokeWidth / 2;
+  const centerY = radius + strokeWidth / 2;         // arc sits in upper portion
   const hubRadius = strokeWidth * 0.28;
-  const needleLength = radius * 0.80;
-  const labelRadius = radius + strokeWidth * 0.85;
-  const gaugeHeight = centerY + hubRadius + strokeWidth * 0.35;
+  const needleLength = radius * 0.78;
+  const labelRadius = radius + strokeWidth * 0.9;   // where numeric labels sit
+  const gaugeHeight = centerY + hubRadius + strokeWidth * 0.3; // total SVG height needed
 
-  // Helper conversions
-  const fracToAngle = (f: number) => -90 + f * 180; // f in [0,1]
-  const valueToAngle = (v: number) => fracToAngle(v / safeMax);
+  /**
+   * FIX: Previous version produced a vertical semicircle (rotated 90° right)
+   * because it mapped 0..100 -> -90..+90 and used a polar conversion without
+   * the -90 shift, yielding a top-to-bottom (vertical) arc.
+   *
+   * We now map 0..100 -> -180..0 degrees so the arc spans the TOP semicircle
+   * from left (-180) through top (-90) to right (0).
+   */
+  const pctToAngle = (p: number) => -180 + (p / 100) * 180;
 
-  const polar = (cx: number, cy: number, r: number, angleDeg: number) => {
-    const rad = angleDeg * Math.PI / 180;
-    return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
+  const polarToCartesian = (cx: number, cy: number, r: number, angleDeg: number) => {
+    const rad = (angleDeg * Math.PI) / 180;
+    return {
+      x: cx + r * Math.cos(rad),
+      y: cy + r * Math.sin(rad)
+    };
   };
 
-  // Build default segments if not provided: 4 quartiles
-  const defaultSegments: GaugeSegment[] = Array.from({ length: 4 }).map((_, i) => {
-    const start = (i * safeMax) / 4;
-    const end = ((i + 1) * safeMax) / 4;
-    const colors = ["#22c55e", "#eab308", "#f97316", "#ef4444"];
-    return { start, end, color: colors[i] };
-  });
-
-  const segs = segments && segments.length ? segments : defaultSegments;
-
-  // Arc path builder for segment from domain start->end
-  const arcPath = (domainStart: number, domainEnd: number) => {
-    const startAngle = valueToAngle(domainStart);
-    const endAngle = valueToAngle(domainEnd);
-    const largeArc = Math.abs(endAngle - startAngle) > 180 ? 1 : 0;
-    const sweep = 1;
-    const start = polar(centerX, centerY, radius, startAngle);
-    const end = polar(centerX, centerY, radius, endAngle);
-    return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} ${sweep} ${end.x} ${end.y}`;
+  // Arc path for a segment along the top semicircle
+  const arcPath = (startPct: number, endPct: number) => {
+    const startAngle = pctToAngle(startPct);
+    const endAngle = pctToAngle(endPct);
+    const largeArcFlag = Math.abs(endAngle - startAngle) > 180 ? 1 : 0;
+    // Sweep=1 keeps motion from left to right across the top with negative -> 0 angles
+    const start = polarToCartesian(centerX, centerY, radius, startAngle);
+    const end = polarToCartesian(centerX, centerY, radius, endAngle);
+    return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${end.x} ${end.y}`;
   };
 
-  // Render segments with progressive fill
-  const renderedSegments = segs.map((seg, idx) => {
-    const reachedStart = fraction * safeMax >= seg.start;
-    const segmentEndValue = Math.min(fraction * safeMax, seg.end);
-    const hasFill = segmentEndValue > seg.start;
+  // Build progressive colored segments
+  const renderedSegments = segments.map((seg, i) => {
+    const segStart = seg.start;
+    const segEnd = seg.end;
+    if (percentage <= segStart) {
+      // Not reached this segment yet
+      return (
+        <path
+          key={`seg-bg-${i}`}
+          d={arcPath(segStart, segEnd)}
+          fill="none"
+          stroke="#e5e7eb"
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+          opacity={0.35}
+        />
+      );
+    }
+
+    const effectiveEnd = Math.min(percentage, segEnd);
 
     return (
-      <g key={`seg-${idx}`}>
-        {/* background for full segment span */}
+      <g key={`seg-${i}`}>
         <path
-          d={arcPath(seg.start, seg.end)}
+          d={arcPath(segStart, segEnd)}
           fill="none"
-          stroke="#e6e7eb"
+          stroke="#e5e7eb"
           strokeWidth={strokeWidth}
           strokeLinecap="round"
           opacity={0.25}
         />
-        {reachedStart && hasFill && (
-          <path
-            d={arcPath(seg.start, segmentEndValue)}
-            fill="none"
-            stroke={seg.color}
-            strokeWidth={strokeWidth}
-            strokeLinecap="round"
-          />
-        )}
+        <path
+          d={arcPath(segStart, effectiveEnd)}
+          fill="none"
+          stroke={seg.color}
+          strokeWidth={strokeWidth}
+          strokeLinecap="round"
+        />
       </g>
     );
   });
 
-  // Tick generation across full domain
-  const ticks: number[] = (() => {
-    const n = Math.max(2, tickCount);
-    return Array.from({ length: n }, (_, i) => (i / (n - 1)) * safeMax);
-  })();
+  // Needle geometry
+  const needleAngle = pctToAngle(percentage);
+  const needleTip = polarToCartesian(centerX, centerY, needleLength, needleAngle);
+  const needleBaseLeft = polarToCartesian(centerX, centerY, hubRadius * 0.6, needleAngle - 90);
+  const needleBaseRight = polarToCartesian(centerX, centerY, hubRadius * 0.6, needleAngle + 90);
 
-  // Needle (triangle) for precise pivot
-  const needleAngle = valueToAngle(clampedValue);
-  const tip = polar(centerX, centerY, needleLength, needleAngle);
-  const baseLeft = polar(centerX, centerY, hubRadius * 0.6, needleAngle - 90);
-  const baseRight = polar(centerX, centerY, hubRadius * 0.6, needleAngle + 90);
   const needlePath = `
-    M ${baseLeft.x} ${baseLeft.y}
-    L ${tip.x} ${tip.y}
-    L ${baseRight.x} ${baseRight.y}
+    M ${needleBaseLeft.x} ${needleBaseLeft.y}
+    L ${needleTip.x} ${needleTip.y}
+    L ${needleBaseRight.x} ${needleBaseRight.y}
     Z
   `;
-
-  // Number formatting for ticks
-  const formatTick = (v: number) => {
-    if (safeMax <= 1.000001) {
-      // small domain (0..1)
-      if (v === 0 || v === safeMax) return v.toFixed(0);
-      return v.toFixed(2).replace(/0+$/,'').replace(/\.$/,''); // trim
-    } else {
-      // larger domain
-      if (safeMax <= 10) return v.toFixed(1).replace(/\.0$/,'');
-      return Math.round(v).toString();
-    }
-  };
 
   return (
     <div className="flex flex-col items-center">
@@ -165,41 +143,31 @@ export const SpeedometerGauge: React.FC<SpeedometerGaugeProps> = ({
         role="img"
         aria-label={title}
       >
-        {/* Full domain faint background (optional subtle base) */}
-        <path
-          d={arcPath(0, safeMax)}
-          fill="none"
-          stroke="#f3f4f6"
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-        />
-
         {/* Segments */}
         {renderedSegments}
 
-        {/* Ticks & Labels */}
-        {ticks.map((t, i) => {
-            const angle = valueToAngle(t);
-            const labelPos = polar(centerX, centerY, labelRadius, angle);
-            return (
-              <text
-                key={`tick-${i}`}
-                x={labelPos.x}
-                y={labelPos.y + strokeWidth * 0.15}
-                textAnchor="middle"
-                fontSize={strokeWidth * 0.35}
-                fontWeight={500}
-                fill="#6b7280"
-              >
-                {formatTick(t)}
-              </text>
-            );
-          })}
+        {/* Tick labels */}
+        {ticks.map((t, idx) => {
+          const pos = polarToCartesian(centerX, centerY, labelRadius, pctToAngle(t));
+          return (
+            <text
+              key={`tick-${idx}`}
+              x={pos.x}
+              y={pos.y + strokeWidth * 0.18}
+              textAnchor="middle"
+              fontSize={strokeWidth * 0.38}
+              fontWeight={500}
+              fill="#6b7280"
+            >
+              {t}
+            </text>
+          );
+        })}
 
         {/* Needle shadow */}
         <path
           d={needlePath}
-          fill="rgba(0,0,0,0.18)"
+          fill="rgba(0,0,0,0.15)"
           style={{ filter: "blur(2px)" }}
         />
 
@@ -207,9 +175,7 @@ export const SpeedometerGauge: React.FC<SpeedometerGaugeProps> = ({
         <path
           d={needlePath}
           fill="#4b5563"
-          style={{
-            transition: "d 0.6s ease"
-          }}
+          style={{ transition: "d 0.6s ease" }}
         />
 
         {/* Hub */}
@@ -229,7 +195,7 @@ export const SpeedometerGauge: React.FC<SpeedometerGaugeProps> = ({
         />
       </svg>
 
-      {/* Value & Title */}
+      {/* Value + Title */}
       <div className="mt-2 text-center">
         {showValue && (
           <div className="text-lg font-bold text-gray-900 leading-tight">
