@@ -312,10 +312,11 @@ const SyntheticData = () => {
     if (data.length === 0) return null;
 
     const columns = Object.keys(data[0] || {});
+    const FIRST_COL_WIDTH = 'w-[220px]'; // keep sticky column predictable
 
     return (
       <div className="w-full max-w-full overflow-hidden">
-        {/* Header */}
+        {/* Header above the table */}
         <div className="flex items-center justify-between mb-4 gap-4">
           <div className="flex items-center gap-4">
             <h3 className="text-lg font-semibold">{title}</h3>
@@ -325,22 +326,27 @@ const SyntheticData = () => {
           </div>
         </div>
 
-        {/* Table Container with scrolling */}
+        {/* Outer card box */}
         <div className="border rounded-lg bg-background w-full h-96">
+          {/* Horizontal scroll is owned here; prevent scroll chaining to page */}
           <div className="w-full h-full overflow-x-auto overflow-y-hidden overscroll-x-contain">
+            {/* Vertical scroll for rows */}
             <div className="h-full overflow-y-auto">
-              <table className="border-collapse text-sm w-max">
+              {/* Make table as wide as needed, but never push the page */}
+              <table className="border-collapse text-sm w-max relative">
                 {/* Header */}
                 <thead className="bg-muted/50 sticky top-0 z-10">
                   <tr>
                     {columns.map((header, index) => (
                       <th
                         key={`${header}-${index}`}
-                        className={`text-left p-3 border-b font-medium bg-muted/50 min-w-[200px] ${
-                          index === 0 ? 'sticky left-0 z-20' : ''
-                        }`}
+                        className={[
+                          'text-left p-3 border-b font-medium bg-muted/50 min-w-[200px]',
+                          index === 0 ? `sticky left-0 z-20 bg-muted/50 ${FIRST_COL_WIDTH}` : '',
+                        ].join(' ')}
                       >
-                        <div className="font-semibold" title={header}>
+                        {/* Truncate so very long column names don't force width */}
+                        <div className="font-semibold max-w-[200px] truncate" title={header}>
                           {header}
                         </div>
                       </th>
@@ -361,16 +367,17 @@ const SyntheticData = () => {
                         return (
                           <td
                             key={`cell-${colIndex}`}
-                            className={`p-3 border-r border-border/30 ${
-                              colIndex === 0 ? 'sticky left-0 z-10 bg-background' : ''
-                            }`}
+                            className={[
+                              'p-3 border-r border-border/30 whitespace-nowrap',
+                              colIndex === 0 ? `sticky left-0 z-10 bg-background ${FIRST_COL_WIDTH}` : '',
+                            ].join(' ')}
                           >
                             {isEmpty ? (
                               <span className="inline-flex items-center px-2 py-1 rounded text-xs bg-destructive/10 text-destructive font-medium">
                                 empty
                               </span>
                             ) : (
-                              <div className="max-w-[180px]" title={String(value)}>
+                              <div className="max-w-[180px] truncate" title={String(value)}>
                                 {String(value)}
                               </div>
                             )}
