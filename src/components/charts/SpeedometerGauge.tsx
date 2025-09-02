@@ -105,14 +105,13 @@ export const SpeedometerGauge = ({
             transform: 'translateX(-50%)'
           }}
         />
-        
-        {/* Value display */}
-        <div className="absolute inset-0 flex flex-col items-center justify-end pb-1">
-          <div className="text-lg font-bold text-foreground">
-            {displayValue}{unit}
-          </div>
-        </div>
       </div>
+      
+      {/* Value display below the speedometer */}
+      <div className="text-lg font-bold text-foreground">
+        {displayValue}{unit}
+      </div>
+      
       <div className="text-sm font-medium text-muted-foreground text-center">
         {title}
       </div>
