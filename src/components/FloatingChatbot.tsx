@@ -4,7 +4,7 @@
 // Expect grounded answers from the hardcoded context in the edge function.
 
 import { useState } from "react";
-import { MessageCircle, X, Minimize2, Send } from "lucide-react";
+import { Bot, X, Minimize2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -94,7 +94,7 @@ export default function FloatingChatbot() {
           size="icon"
         >
           <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-            <MessageCircle className="w-5 h-5 text-purple-600" />
+            <Bot className="w-5 h-5 text-purple-600" />
           </div>
         </Button>
       )}
@@ -109,7 +109,7 @@ export default function FloatingChatbot() {
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
             <div className="flex items-center gap-2">
-              <MessageCircle className="w-5 h-5" />
+              <Bot className="w-5 h-5" />
               <span className="font-medium">CreditWise Assistant</span>
             </div>
             <div className="flex items-center gap-1">
