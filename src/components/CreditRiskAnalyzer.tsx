@@ -134,7 +134,7 @@ function computePD(row: UserRow, stats: { meanAOV: number; meanRecharge: number 
 
 function category(pd: number): { label: string; tone: "secondary" | "default" | "destructive" } {
   if (pd < 30) return { label: "Low Risk", tone: "secondary" };
-  if (pd < 60) return { label: "Medium Risk", tone: "default" };
+  if (pd < 70) return { label: "Medium Risk", tone: "default" };
   return { label: "High Risk", tone: "destructive" };
 }
 
@@ -142,7 +142,6 @@ const CreditRiskAnalyzer = () => {
   const [rows, setRows] = useState<UserRow[]>([]);
   const [selected, setSelected] = useState<string>("");
   const [pdScore, setPdScore] = useState<number | null>(null);
-  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   // Individual risk assessment form fields
@@ -205,22 +204,14 @@ const CreditRiskAnalyzer = () => {
     });
   };
 
-  const onAnalyze = async () => {
+  const onAnalyze = () => {
     if (!selectedRow) {
       toast({ title: "Select a user", description: "Choose a User ID before analyzing." });
       return;
     }
-    
-    setIsAnalyzing(true);
-    
-    // Add 2-second delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
     const score = computePD(selectedRow, stats);
     setPdScore(score);
     const c = category(score);
-    setIsAnalyzing(false);
-    
     toast({ title: `Risk: ${c.label}`, description: `PD Score ${score.toFixed(2)}%` });
   };
 
@@ -398,13 +389,8 @@ const CreditRiskAnalyzer = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <Button 
-                onClick={onAnalyze} 
-                className="w-full md:w-auto" 
-                variant="hero"
-                disabled={isAnalyzing}
-              >
-                {isAnalyzing ? "Analyzing..." : "Analyze Risk"}
+              <Button onClick={onAnalyze} className="w-full md:w-auto" variant="hero">
+                Analyze Risk
               </Button>
             </div>
 
