@@ -100,7 +100,7 @@ export async function getUsers(): Promise<string[]> {
 export async function deleteAllRiskData(): Promise<{ deleted: number }> {
   try {
     const response = await fetch(
-      `https://ixtbpnpbswzjrgnkvcfg.supabase.co/rest/v1/risk_snapshots`,
+      `https://ixtbpnpbswzjrgnkvcfg.supabase.co/rest/v1/risk_snapshots?id=gte.0`,
       {
         method: 'DELETE',
         headers: {
