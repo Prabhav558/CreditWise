@@ -37,34 +37,21 @@ export async function getUserTimeseries(
   to?: string
 ): Promise<TimeseriesData[]> {
   try {
-    // Use direct query approach for compatibility
-    let query = `
-      SELECT user_id, month, pd_score, risk_category, features 
-      FROM risk_snapshots 
-      WHERE user_id = '${userId}'
-    `;
+    let url = `https://ixtbpnpbswzjrgnkvcfg.supabase.co/rest/v1/risk_snapshots?select=user_id,month,pd_score,risk_category,features&user_id=eq.${userId}&order=month.asc`;
     
     if (from) {
-      query += ` AND month >= '${from}-01'`;
+      url += `&month=gte.${from}-01`;
     }
     if (to) {
-      query += ` AND month <= '${to}-01'`;
+      url += `&month=lte.${to}-01`;
     }
     
-    query += ` ORDER BY month ASC`;
-    
-    const response = await fetch(
-      `https://ixtbpnpbswzjrgnkvcfg.supabase.co/rest/v1/rpc/execute_query`,
-      {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4dGJwbnBic3d6anJnbmt2Y2ZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTcxOTMsImV4cCI6MjA3MjM5MzE5M30.qSeDWSWbYcwFbQgrL35yTmb7LQWlo-_K_94DKI2ObpU`,
-          'Content-Type': 'application/json',
-          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4dGJwbnBic3d6anJnbmt2Y2ZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTcxOTMsImV4cCI6MjA3MjM5MzE5M30.qSeDWSWbYcwFbQgrL35yTmb7LQWlo-_K_94DKI2ObpU'
-        },
-        body: JSON.stringify({ query })
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4dGJwbnBic3d6anJnbmt2Y2ZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTcxOTMsImV4cCI6MjA3MjM5MzE5M30.qSeDWSWbYcwFbQgrL35yTmb7LQWlo-_K_94DKI2ObpU`,
+        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4dGJwbnBic3d6anJnbmt2Y2ZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTcxOTMsImV4cCI6MjA3MjM5MzE5M30.qSeDWSWbYcwFbQgrL35yTmb7LQWlo-_K_94DKI2ObpU'
       }
-    );
+    });
 
     if (!response.ok) {
       throw new Error('Failed to fetch timeseries data');
@@ -73,7 +60,7 @@ export async function getUserTimeseries(
     const data = await response.json();
     
     // Transform to match TimeseriesData interface
-    return data.map((row: any) => ({
+    return (data || []).map((row: any) => ({
       user_id: row.user_id,
       month: row.month?.slice(0, 7) || '', // Convert YYYY-MM-DD to YYYY-MM
       pd_percent: (row.pd_score || 0) * 100, // Convert 0-1 to 0-100
