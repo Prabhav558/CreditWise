@@ -75,8 +75,9 @@ export async function getUserTimeseries(
 
 export async function getUsers(): Promise<string[]> {
   try {
+    // Get users who actually have risk snapshots data
     const response = await fetch(
-      `https://ixtbpnpbswzjrgnkvcfg.supabase.co/rest/v1/crm_users?select=user_id&order=user_id`,
+      `https://ixtbpnpbswzjrgnkvcfg.supabase.co/rest/v1/risk_snapshots?select=user_id&order=user_id`,
       {
         headers: {
           'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4dGJwbnBic3d6anJnbmt2Y2ZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTcxOTMsImV4cCI6MjA3MjM5MzE5M30.qSeDWSWbYcwFbQgrL35yTmb7LQWlo-_K_94DKI2ObpU`,
@@ -90,7 +91,9 @@ export async function getUsers(): Promise<string[]> {
     }
 
     const data = await response.json();
-    return data.map((row: any) => row.user_id);
+    // Get unique user IDs from risk_snapshots table
+    const uniqueUsers = [...new Set(data.map((row: any) => row.user_id))] as string[];
+    return uniqueUsers.filter(userId => userId && typeof userId === 'string'); // Filter out any null/undefined values
   } catch (error) {
     console.error('Error fetching users:', error);
     return [];
