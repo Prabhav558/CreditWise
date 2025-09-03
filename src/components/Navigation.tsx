@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Shield } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const Navigation = () => {
   const location = useLocation();
@@ -13,7 +14,7 @@ const Navigation = () => {
   ];
 
   return (
-    <nav className="bg-white/95 backdrop-blur-md border-b border-gray-200/50 sticky top-0 z-50 shadow-sm">
+    <nav className="bg-background/95 backdrop-blur-md border-b border-border sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -29,9 +30,9 @@ const Navigation = () => {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className={`text-gray-600 hover:text-primary hover:bg-accent/10 transition-all duration-200 ${
+                  className={`text-muted-foreground hover:text-foreground hover:bg-accent/10 transition-all duration-200 ${
                     location.pathname === item.path 
-                      ? "bg-accent/15 text-primary font-medium shadow-sm" 
+                      ? "bg-accent/15 text-foreground font-medium shadow-sm" 
                       : ""
                   }`}
                 >
@@ -39,10 +40,12 @@ const Navigation = () => {
                 </Button>
               </Link>
             ))}
+            <ThemeToggle />
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden">
+          {/* Mobile menu button and theme toggle */}
+          <div className="md:hidden flex items-center gap-2">
+            <ThemeToggle />
             <Button variant="ghost" size="sm" className="text-primary hover:bg-accent/10">
               <Shield size={20} />
             </Button>
