@@ -54,9 +54,13 @@ function DefaulterTrackingContent() {
   });
 
   const handleCSVUploaded = () => {
+    // Invalidate all queries to refresh both user list and timeseries data
     queryClient.invalidateQueries({ queryKey: ['users'] });
+    queryClient.invalidateQueries({ queryKey: ['timeseries'] });
+    
+    // If a user is currently selected, refresh their specific timeseries data
     if (selectedUser) {
-      queryClient.invalidateQueries({ queryKey: ['timeseries', selectedUser] });
+      queryClient.invalidateQueries({ queryKey: ['timeseries', selectedUser, timeRange] });
     }
   };
 

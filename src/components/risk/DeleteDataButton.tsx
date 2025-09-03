@@ -13,7 +13,7 @@ import {
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
 import { deleteAllRiskData } from "@/lib/api";
-import { toast } from "sonner";
+import { useToast } from "@/hooks/use-toast";
 
 interface DeleteDataButtonProps {
   onDeleted?: () => void;
@@ -21,15 +21,23 @@ interface DeleteDataButtonProps {
 
 export default function DeleteDataButton({ onDeleted }: DeleteDataButtonProps) {
   const [isDeleting, setIsDeleting] = useState(false);
+  const { toast } = useToast();
 
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
       const result = await deleteAllRiskData();
-      toast.success(`Deleted ${result.deleted} risk records`);
+      toast({
+        title: "Success",
+        description: `Deleted ${result.deleted} risk records`
+      });
       onDeleted?.();
     } catch (error) {
-      toast.error("Failed to delete risk data");
+      toast({
+        title: "Delete failed",
+        description: "Failed to delete risk data",
+        variant: "destructive"
+      });
       console.error("Delete error:", error);
     } finally {
       setIsDeleting(false);
