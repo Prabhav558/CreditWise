@@ -134,7 +134,7 @@ function computePD(row: UserRow, stats: { meanAOV: number; meanRecharge: number 
 
 function category(pd: number): { label: string; tone: "secondary" | "default" | "destructive" } {
   if (pd < 30) return { label: "Low Risk", tone: "secondary" };
-  if (pd < 70) return { label: "Medium Risk", tone: "default" };
+  if (pd < 60) return { label: "Medium Risk", tone: "default" };
   return { label: "High Risk", tone: "destructive" };
 }
 
@@ -278,7 +278,7 @@ const CreditRiskAnalyzer = () => {
       let fillColor = 'FFFFFFFF'; // default white
       if (pdScore <= 20) {
         fillColor = 'FF22C55E'; // green
-      } else if (pdScore <= 80) {
+      } else if (pdScore <= 69.9) {
         fillColor = 'FFEAB308'; // yellow  
       } else {
         fillColor = 'FFEF4444'; // red
