@@ -96,3 +96,29 @@ export async function getUsers(): Promise<string[]> {
     return [];
   }
 }
+
+export async function deleteAllRiskData(): Promise<{ deleted: number }> {
+  try {
+    const response = await fetch(
+      `https://ixtbpnpbswzjrgnkvcfg.supabase.co/rest/v1/risk_snapshots`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4dGJwbnBic3d6anJnbmt2Y2ZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTcxOTMsImV4cCI6MjA3MjM5MzE5M30.qSeDWSWbYcwFbQgrL35yTmb7LQWlo-_K_94DKI2ObpU`,
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Iml4dGJwbnBic3d6anJnbmt2Y2ZnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY4MTcxOTMsImV4cCI6MjA3MjM5MzE5M30.qSeDWSWbYcwFbQgrL35yTmb7LQWlo-_K_94DKI2ObpU',
+          'Prefer': 'return=representation'
+        }
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to delete risk data');
+    }
+
+    const data = await response.json();
+    return { deleted: data.length };
+  } catch (error) {
+    console.error('Error deleting risk data:', error);
+    throw error;
+  }
+}

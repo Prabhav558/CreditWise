@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import CSVIngest from "@/components/risk/CSVIngest";
 import UserList from "@/components/risk/UserList";
 import PDTrendChart from "@/components/risk/PDTrendChart";
+import DeleteDataButton from "@/components/risk/DeleteDataButton";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -59,6 +60,12 @@ function DefaulterTrackingContent() {
     }
   };
 
+  const handleDataDeleted = () => {
+    queryClient.invalidateQueries({ queryKey: ['users'] });
+    queryClient.invalidateQueries({ queryKey: ['timeseries'] });
+    setSelectedUser(null);
+  };
+
   const latestData = timeseriesData[timeseriesData.length - 1];
   const getRiskBadgeVariant = (category: string) => {
     switch (category) {
@@ -78,7 +85,10 @@ function DefaulterTrackingContent() {
         <div className="container">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold">Risk Analysis Dashboard</h2>
-            <CSVIngest onUploaded={handleCSVUploaded} />
+            <div className="flex gap-3">
+              <DeleteDataButton onDeleted={handleDataDeleted} />
+              <CSVIngest onUploaded={handleCSVUploaded} />
+            </div>
           </div>
         </div>
       </section>
