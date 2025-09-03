@@ -138,6 +138,27 @@ function category(pd: number): { label: string; tone: "secondary" | "default" | 
   return { label: "High Risk", tone: "destructive" };
 }
 
+/* ------------------------ NEW: API integration (minimal) ------------------------ */
+const API_BASE = import.meta.env.VITE_API_BASE ?? "http://127.0.0.1:8000";
+
+async function predictViaApi(features: Record<string, unknown>) {
+  const res = await fetch(`${API_BASE}/predict`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ features }),
+  });
+  if (!res.ok) {
+    const msg = await res.text();
+    throw new Error(`${res.status} ${res.statusText}: ${msg}`);
+  }
+  return res.json() as Promise<{
+    probability_of_default: number; // 0..1
+    credit_score: number;           // 300..900
+    used_feature_names: string[];
+  }>;
+}
+/* ------------------------------------------------------------------------------ */
+
 const CreditRiskAnalyzer = () => {
   const [rows, setRows] = useState<UserRow[]>([]);
   const [selected, setSelected] = useState<string>("");
@@ -204,15 +225,41 @@ const CreditRiskAnalyzer = () => {
     });
   };
 
-  const onAnalyze = () => {
+  // UPDATED: first try API predict, fallback to local computePD (no UI changes)
+  const onAnalyze = async () => {
     if (!selectedRow) {
       toast({ title: "Select a user", description: "Choose a User ID before analyzing." });
       return;
     }
-    const score = computePD(selectedRow, stats);
-    setPdScore(score);
-    const c = category(score);
-    toast({ title: `Risk: ${c.label}`, description: `PD Score ${score.toFixed(2)}%` });
+
+    // Build a clean features object (numbers when possible, skip undefined/empty)
+    const features: Record<string, unknown> = {};
+    Object.entries(selectedRow).forEach(([k, v]) => {
+      if (v === undefined || k === "user_id") return;
+      if (typeof v === "string" && v.trim() === "") return;
+      const n = toNumber(v);
+      features[k] = Number.isFinite(n) ? n : v;
+    });
+
+    try {
+      const data = await predictViaApi(features);
+      const pdPct = clamp(data.probability_of_default * 100, 0, 100);
+      setPdScore(pdPct);
+      const c = category(pdPct);
+      toast({
+        title: `Risk (API): ${c.label}`,
+        description: `PD ${pdPct.toFixed(2)}% • Credit Score ${data.credit_score}`,
+      });
+    } catch (e: any) {
+      // Fallback to local calculation if API fails
+      const score = computePD(selectedRow, stats);
+      setPdScore(score);
+      const c = category(score);
+      toast({
+        title: `Risk (Local): ${c.label}`,
+        description: `PD Score ${score.toFixed(2)}% (API unreachable)`,
+      });
+    }
   };
 
   const loadDemo = () => {
@@ -267,18 +314,18 @@ const CreditRiskAnalyzer = () => {
     };
 
     // Add data rows with conditional formatting
-    updatedData.forEach((row, index) => {
+    updatedData.forEach((row) => {
       const rowData = headers.map(header => row[header]);
       const worksheetRow = worksheet.addRow(rowData);
       
       // Get PD score for this row
-      const pdScore = row.pd_score || 0;
+      const pdScore = (row as any).pd_score || 0;
       
       // Determine row color based on PD score
       let fillColor = 'FFFFFFFF'; // default white
       if (pdScore <= 20) {
         fillColor = 'FF22C55E'; // green
-      } else if (pdScore <= 80) {
+      } else if (pdScore <= 59.9) {
         fillColor = 'FFEAB308'; // yellow  
       } else {
         fillColor = 'FFEF4444'; // red
