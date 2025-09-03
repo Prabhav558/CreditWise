@@ -142,6 +142,7 @@ const CreditRiskAnalyzer = () => {
   const [rows, setRows] = useState<UserRow[]>([]);
   const [selected, setSelected] = useState<string>("");
   const [pdScore, setPdScore] = useState<number | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   // Individual risk assessment form fields
@@ -209,10 +210,19 @@ const CreditRiskAnalyzer = () => {
       toast({ title: "Select a user", description: "Choose a User ID before analyzing." });
       return;
     }
-    const score = computePD(selectedRow, stats);
-    setPdScore(score);
-    const c = category(score);
-    toast({ title: `Risk: ${c.label}`, description: `PD Score ${score.toFixed(2)}%` });
+    
+    setIsAnalyzing(true);
+    
+    // Random delay between 2-4 seconds to simulate AI processing
+    const delay = Math.random() * 2000 + 2000; // 2000-4000ms
+    
+    setTimeout(() => {
+      const score = computePD(selectedRow, stats);
+      setPdScore(score);
+      const c = category(score);
+      toast({ title: `Risk: ${c.label}`, description: `PD Score ${score.toFixed(2)}%` });
+      setIsAnalyzing(false);
+    }, delay);
   };
 
   const loadDemo = () => {
@@ -389,8 +399,13 @@ const CreditRiskAnalyzer = () => {
                   </SelectContent>
                 </Select>
               </div>
-              <Button onClick={onAnalyze} className="w-full md:w-auto" variant="hero">
-                Analyze Risk
+              <Button 
+                onClick={onAnalyze} 
+                className="w-full md:w-auto" 
+                variant="hero"
+                disabled={isAnalyzing}
+              >
+                {isAnalyzing ? "Analyzing..." : "Analyze Risk"}
               </Button>
             </div>
 
