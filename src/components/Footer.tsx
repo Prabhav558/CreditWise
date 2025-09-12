@@ -26,7 +26,6 @@ const Footer = () => {
               <p className="text-gray-300">Krishna Somani</p>
               <p className="text-gray-300">Prabhav Singh</p>
               <p className="text-gray-300">Sarthak Lal</p>
-              <p className="text-gray-300">Vatsala Singh</p>
             </div>
           </div>
 
