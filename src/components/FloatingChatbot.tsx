@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { askCreditWise } from "@/api";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Message {
   id: string;
@@ -21,12 +22,13 @@ interface Message {
 }
 
 export default function FloatingChatbot() {
+  const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
-      text: 'Hello! I\'m your CreditWise assistant. How can I help you with credit risk analysis today?',
+      text: t('chatbot.welcome'),
       sender: 'bot',
       timestamp: new Date()
     }
@@ -55,7 +57,7 @@ export default function FloatingChatbot() {
       
       let responseText = result.answer;
       if (!responseText || responseText === "No response.") {
-        responseText = "Sorry, I couldn't find that in CreditWise's context.";
+        responseText = t('chatbot.noResponse');
       }
 
       const botMessage: Message = {
@@ -70,7 +72,7 @@ export default function FloatingChatbot() {
     } catch (error) {
       console.error('Chat error:', error);
       toast({
-        title: "Chat temporarily unavailable. Please try again.",
+        title: t('chatbot.unavailable'),
         variant: "destructive"
       });
     } finally {
@@ -126,9 +128,9 @@ export default function FloatingChatbot() {
                 <MessageCircle className="w-6 h-6 text-primary-foreground" />
                 <div className="absolute -inset-1 rounded-full bg-accent/20 blur-sm"></div>
               </div>
-              <span className="font-semibold text-primary-foreground">CreditWise Assistant</span>
+              <span className="font-semibold text-primary-foreground">{t('chatbot.title')}</span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 relative z-10">
               <Button
                 variant="ghost"
                 size="icon"
@@ -171,7 +173,7 @@ export default function FloatingChatbot() {
                         </div>
                         {message.sender === 'bot' && message.sources && (
                           <div className="text-xs text-muted-foreground mt-1 opacity-75">
-                            Sources available
+                            {t('chatbot.sources')}
                           </div>
                         )}
                       </div>
@@ -180,7 +182,7 @@ export default function FloatingChatbot() {
                   {isTyping && (
                     <div className="flex justify-start">
                       <div className="bg-muted text-muted-foreground p-3 rounded-lg text-sm">
-                        Typing...
+                        {t('chatbot.typing')}
                       </div>
                     </div>
                   )}
@@ -190,7 +192,7 @@ export default function FloatingChatbot() {
               {/* Input Area */}
               <div className="flex gap-2 p-4 border-t">
                 <Input
-                  placeholder="Type your message..."
+                  placeholder={t('chatbot.placeholder')}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}

@@ -2,15 +2,18 @@ import { Button } from "@/components/ui/button";
 import { Shield } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { LanguageSelector } from "@/components/LanguageSelector";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Navigation = () => {
   const location = useLocation();
+  const { t } = useLanguage();
   
   const navItems = [
-    { path: "/", label: "Defaulter Search & Tracking" },
-    { path: "/individual-assessment", label: "Individual Risk Assessment" },
-    { path: "/synthetic-data", label: "Synthetic Data Generator" },
-    { path: "/how-it-works", label: "How it Works" }
+    { path: "/", label: t('nav.defaulter') },
+    { path: "/individual-assessment", label: t('nav.individual') },
+    { path: "/synthetic-data", label: t('nav.synthetic') },
+    { path: "/how-it-works", label: t('nav.howItWorks') }
   ];
 
   return (
@@ -40,11 +43,13 @@ const Navigation = () => {
                 </Button>
               </Link>
             ))}
+            <LanguageSelector />
             <ThemeToggle />
           </div>
 
           {/* Mobile menu button and theme toggle */}
           <div className="md:hidden flex items-center gap-2">
+            <LanguageSelector />
             <ThemeToggle />
             <Button variant="ghost" size="sm" className="text-primary hover:bg-accent/10">
               <Shield size={20} />
