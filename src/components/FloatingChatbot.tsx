@@ -65,7 +65,7 @@ export default function FloatingChatbot() {
       
       setMessages(prev => [...prev, botMessage]);
     } catch (error) {
-      console.error('Chat error:', error);
+      
       toast({
         title: t('chatbot.unavailable'),
         variant: "destructive"
