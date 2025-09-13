@@ -22,12 +22,12 @@ const Hero = () => {
           Predict Probability of Default using <span className="text-accent font-medium">alternative behavioral signals</span>. Upload your dataset and assess risk instantly with our AI-powered analytics.
         </p>
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a href="#analyzer">
-            <Button size="lg" className="px-8 py-3 bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300">
+          <a href="#analyzer" className="hover-scale">
+            <Button size="lg" className="px-8 py-3 bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
               Get Started
             </Button>
           </a>
-          <a className="story-link text-foreground hover:text-accent transition-colors duration-200 font-medium" href="/how-it-works">
+          <a className="story-link text-foreground hover:text-accent transition-all duration-300 font-medium hover-scale" href="/how-it-works">
             How it works →
           </a>
         </div>
