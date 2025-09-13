@@ -52,6 +52,18 @@ export type Database = {
           },
         ]
       }
+      crm_users: {
+        Row: {
+          user_id: string
+        }
+        Insert: {
+          user_id: string
+        }
+        Update: {
+          user_id?: string
+        }
+        Relationships: []
+      }
       documents: {
         Row: {
           created_at: string | null
@@ -97,9 +109,78 @@ export type Database = {
         }
         Relationships: []
       }
+      risk_snapshots: {
+        Row: {
+          created_at: string | null
+          features: Json
+          id: number
+          month: string
+          pd_score: number
+          risk_category: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          features: Json
+          id?: number
+          month: string
+          pd_score: number
+          risk_category: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          features?: Json
+          id?: number
+          month?: string
+          pd_score?: number
+          risk_category?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_snapshots_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "crm_users"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      v_user_pd_timeseries: {
+        Row: {
+          features: Json | null
+          month: string | null
+          pd_percent: number | null
+          risk_category: string | null
+          user_id: string | null
+        }
+        Insert: {
+          features?: Json | null
+          month?: string | null
+          pd_percent?: never
+          risk_category?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          features?: Json | null
+          month?: string | null
+          pd_percent?: never
+          risk_category?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_snapshots_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "crm_users"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
     }
     Functions: {
       binary_quantize: {
