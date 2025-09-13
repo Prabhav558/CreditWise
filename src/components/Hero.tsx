@@ -11,11 +11,7 @@ const Hero = () => {
       </div>
 
       <div className="relative mx-auto max-w-4xl text-center py-16 md:py-24 animate-enter">
-        <div className="inline-flex items-center gap-2 rounded-full border border-accent/20 px-4 py-2 text-xs md:text-sm bg-card/80 backdrop-blur-sm shadow-soft">
-          <Shield className="text-accent" size={16} />
-          <span className="text-foreground font-medium">CreditWise — Alternative Data Credit Risk</span>
-        </div>
-        <h1 className="mt-8 text-4xl md:text-7xl font-bold tracking-tight leading-tight">
+        <h1 className="text-4xl md:text-7xl font-bold tracking-tight leading-tight">
           <span className="bg-gradient-to-r from-accent via-primary to-accent bg-clip-text text-transparent">
             Credit Risk Prediction
           </span>
