@@ -31,10 +31,6 @@ const Hero = () => {
             How it works →
           </a>
         </div>
-        <div className="mt-12 inline-flex items-center gap-2 text-sm text-muted-foreground bg-card/50 backdrop-blur-sm px-4 py-2 rounded-full border border-border/50">
-          <TrendingUp className="text-accent" size={16} /> 
-          <span>Real-time monitoring ready</span>
-        </div>
       </div>
     </header>
   );
