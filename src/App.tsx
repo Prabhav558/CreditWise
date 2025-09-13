@@ -15,8 +15,8 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => (
-  <LanguageProvider>
-    <QueryClientProvider client={queryClient}>
+  <QueryClientProvider client={queryClient}>
+    <LanguageProvider>
       <ThemeProvider defaultTheme="light" storageKey="finshield-ui-theme">
         <TooltipProvider>
           <Toaster />
@@ -36,8 +36,8 @@ const App = () => (
           </BrowserRouter>
         </TooltipProvider>
       </ThemeProvider>
-    </QueryClientProvider>
-  </LanguageProvider>
+    </LanguageProvider>
+  </QueryClientProvider>
 );
 
 export default App;
