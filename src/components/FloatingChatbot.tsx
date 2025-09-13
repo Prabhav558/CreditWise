@@ -1,13 +1,16 @@
+// Test:
+// 1) Ask: "What does FinShield predict?"
+// 2) Ask: "List the dataset features."
+// Expect grounded answers from the hardcoded context in the edge function.
+
 import { useState } from "react";
-import { Bot, X, Minimize2, Send, Sparkles } from "lucide-react";
+import { Bot, X, Minimize2, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { askCreditWise } from "@/api";
 import { useToast } from "@/hooks/use-toast";
-import { useLanguage } from "@/contexts/LanguageContext";
-import creditWiseLogo from "@/assets/creditwise-logo.png";
 
 interface Message {
   id: string;
@@ -20,24 +23,17 @@ interface Message {
 export default function FloatingChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      text: 'Hello! I\'m your CreditWise assistant. How can I help you with credit risk analysis today?',
+      sender: 'bot',
+      timestamp: new Date()
+    }
+  ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const { toast } = useToast();
-  const { t } = useLanguage();
-
-  // Initialize with greeting message when opened
-  const initializeChat = () => {
-    if (messages.length === 0) {
-      setMessages([{
-        id: '1',
-        text: t('chatbot.greeting'),
-        sender: 'bot',
-        timestamp: new Date()
-      }]);
-    }
-    setIsOpen(true);
-  };
 
   const sendMessage = async () => {
     if (!inputValue.trim()) return;
@@ -59,7 +55,7 @@ export default function FloatingChatbot() {
       
       let responseText = result.answer;
       if (!responseText || responseText === "No response.") {
-        responseText = t('chatbot.noResponse');
+        responseText = "Sorry, I couldn't find that in CreditWise's context.";
       }
 
       const botMessage: Message = {
@@ -74,7 +70,7 @@ export default function FloatingChatbot() {
     } catch (error) {
       console.error('Chat error:', error);
       toast({
-        title: t('chatbot.error'),
+        title: "Chat temporarily unavailable. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -93,41 +89,32 @@ export default function FloatingChatbot() {
       {/* Floating Chat Button */}
       {!isOpen && (
         <Button
-          onClick={initializeChat}
-          className="fixed bottom-6 right-6 w-16 h-16 rounded-full shadow-xl hover:shadow-2xl transition-all duration-300 z-50 p-0 bg-gradient-to-r from-primary to-accent hover:scale-110 border-2 border-background/20"
+          onClick={() => setIsOpen(true)}
+          className="fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 bg-background border-2 border-border z-50 p-0"
           size="icon"
         >
-          <div className="relative">
-            <img src={creditWiseLogo} alt="CreditWise" className="w-8 h-8" />
-            <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse border-2 border-background"></div>
-          </div>
+          <Bot className="w-12 h-12 text-foreground" />
         </Button>
       )}
 
       {/* Chatbot Screen */}
       {isOpen && (
         <Card 
-          className={`fixed bottom-6 right-6 w-96 shadow-2xl border-0 bg-gradient-to-b from-background to-background/95 backdrop-blur-lg z-50 transition-all duration-300 rounded-2xl overflow-hidden ${
-            isMinimized ? 'h-16' : 'h-[32rem]'
+          className={`fixed bottom-6 right-6 w-80 shadow-2xl border-0 bg-background z-50 transition-all duration-300 ${
+            isMinimized ? 'h-14' : 'h-96'
           }`}
         >
           {/* Header */}
-          <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary to-accent text-primary-foreground">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <img src={creditWiseLogo} alt="CreditWise" className="w-8 h-8" />
-                <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-primary-foreground"></div>
-              </div>
-              <div>
-                <span className="font-semibold text-sm">{t('chatbot.title')}</span>
-                <div className="text-xs opacity-80">Online</div>
-              </div>
+          <div className="flex items-center justify-between p-4 border-b bg-primary text-primary-foreground rounded-t-lg">
+            <div className="flex items-center gap-2">
+              <Bot className="w-5 h-5" />
+              <span className="font-medium">CreditWise Assistant</span>
             </div>
             <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="icon"
-                className="w-8 h-8 text-primary-foreground hover:bg-primary-foreground/20 rounded-full"
+                className="w-6 h-6 text-primary-foreground hover:bg-primary-foreground/20"
                 onClick={() => setIsMinimized(!isMinimized)}
               >
                 <Minimize2 className="w-4 h-4" />
@@ -135,7 +122,7 @@ export default function FloatingChatbot() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="w-8 h-8 text-primary-foreground hover:bg-primary-foreground/20 rounded-full"
+                className="w-6 h-6 text-primary-foreground hover:bg-primary-foreground/20"
                 onClick={() => setIsOpen(false)}
               >
                 <X className="w-4 h-4" />
@@ -147,60 +134,35 @@ export default function FloatingChatbot() {
           {!isMinimized && (
             <>
               {/* Messages */}
-              <ScrollArea className="flex-1 p-4 h-80 bg-gradient-to-b from-background/50 to-muted/30">
+              <ScrollArea className="flex-1 p-4 h-64">
                 <div className="space-y-4">
                   {messages.map((message) => (
                     <div
                       key={message.id}
-                      className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} animate-fade-in`}
+                      className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
                     >
-                      <div className={`max-w-[85%] ${message.sender === 'user' ? 'order-2' : 'order-1'}`}>
-                        {message.sender === 'bot' && (
-                          <div className="flex items-center gap-2 mb-1">
-                            <img src={creditWiseLogo} alt="Bot" className="w-5 h-5" />
-                            <span className="text-xs text-muted-foreground">CreditWise AI</span>
-                          </div>
-                        )}
+                      <div className="max-w-[80%]">
                         <div
-                          className={`p-3 rounded-2xl text-sm shadow-md ${
+                          className={`p-3 rounded-lg text-sm ${
                             message.sender === 'user'
-                              ? 'bg-gradient-to-r from-primary to-accent text-primary-foreground ml-2 rounded-br-md'
-                              : 'bg-background/80 text-foreground border border-border/50 mr-2 rounded-bl-md'
+                              ? 'bg-primary text-primary-foreground'
+                              : 'bg-muted text-muted-foreground'
                           }`}
                         >
                           {message.text}
                         </div>
                         {message.sender === 'bot' && message.sources && (
-                          <div className="text-xs text-muted-foreground mt-1 ml-2 flex items-center gap-1">
-                            <Sparkles className="w-3 h-3" />
+                          <div className="text-xs text-muted-foreground mt-1 opacity-75">
                             Sources available
                           </div>
                         )}
-                        <div className={`text-xs text-muted-foreground mt-1 ${
-                          message.sender === 'user' ? 'text-right mr-2' : 'ml-2'
-                        }`}>
-                          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </div>
                       </div>
                     </div>
                   ))}
                   {isTyping && (
-                    <div className="flex justify-start animate-fade-in">
-                      <div className="max-w-[85%]">
-                        <div className="flex items-center gap-2 mb-1">
-                          <img src={creditWiseLogo} alt="Bot" className="w-5 h-5" />
-                          <span className="text-xs text-muted-foreground">CreditWise AI</span>
-                        </div>
-                        <div className="bg-background/80 text-foreground border border-border/50 p-3 rounded-2xl rounded-bl-md text-sm mr-2">
-                          <div className="flex items-center gap-1">
-                            <div className="flex space-x-1">
-                              <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                              <div className="w-2 h-2 bg-primary rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                              <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
-                            </div>
-                            <span className="text-xs text-muted-foreground ml-2">{t('chatbot.typing')}</span>
-                          </div>
-                        </div>
+                    <div className="flex justify-start">
+                      <div className="bg-muted text-muted-foreground p-3 rounded-lg text-sm">
+                        Typing...
                       </div>
                     </div>
                   )}
@@ -208,19 +170,18 @@ export default function FloatingChatbot() {
               </ScrollArea>
 
               {/* Input Area */}
-              <div className="flex gap-3 p-4 bg-background/80 border-t border-border/30">
+              <div className="flex gap-2 p-4 border-t">
                 <Input
-                  placeholder={t('chatbot.placeholder')}
+                  placeholder="Type your message..."
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  className="flex-1 rounded-full border-border/50 bg-background/50 focus:bg-background transition-colors"
+                  className="flex-1"
                 />
                 <Button 
                   onClick={sendMessage}
                   size="icon"
                   disabled={!inputValue.trim() || isTyping}
-                  className="rounded-full bg-gradient-to-r from-primary to-accent hover:scale-105 transition-transform shadow-lg disabled:opacity-50"
                 >
                   <Send className="w-4 h-4" />
                 </Button>

@@ -2,19 +2,15 @@ import { Button } from "@/components/ui/button";
 import { Shield } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { LanguageSelector } from "@/components/LanguageSelector";
-import { useLanguage } from "@/contexts/LanguageContext";
-import creditWiseLogo from "@/assets/creditwise-logo.png";
 
 const Navigation = () => {
   const location = useLocation();
-  const { t } = useLanguage();
   
   const navItems = [
-    { path: "/", label: t('nav.defaulterTracking') },
-    { path: "/individual-assessment", label: t('nav.individualAssessment') },
-    { path: "/synthetic-data", label: t('nav.syntheticData') },
-    { path: "/how-it-works", label: t('nav.howItWorks') }
+    { path: "/", label: "Defaulter Search & Tracking" },
+    { path: "/individual-assessment", label: "Individual Risk Assessment" },
+    { path: "/synthetic-data", label: "Synthetic Data Generator" },
+    { path: "/how-it-works", label: "How it Works" }
   ];
 
   return (
@@ -22,8 +18,8 @@ const Navigation = () => {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 text-primary font-semibold">
-            <img src={creditWiseLogo} alt="CreditWise Logo" className="w-8 h-8" />
+          <Link to="/" className="flex items-center gap-2 text-primary font-semibold">
+            <Shield size={24} className="text-accent" />
             <span className="text-lg bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">CreditWise</span>
           </Link>
 
@@ -44,13 +40,11 @@ const Navigation = () => {
                 </Button>
               </Link>
             ))}
-            <LanguageSelector />
             <ThemeToggle />
           </div>
 
           {/* Mobile menu button and theme toggle */}
           <div className="md:hidden flex items-center gap-2">
-            <LanguageSelector />
             <ThemeToggle />
             <Button variant="ghost" size="sm" className="text-primary hover:bg-accent/10">
               <Shield size={20} />
