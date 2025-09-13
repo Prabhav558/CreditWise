@@ -2,7 +2,7 @@ import { Github } from "lucide-react";
 
 const Footer = () => {
   return (
-    <footer className="bg-primary text-primary-foreground dark:bg-card dark:text-card-foreground">
+    <footer className="bg-primary text-primary-foreground dark:bg-muted dark:text-foreground border-t border-border">
       <div className="container mx-auto px-6 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           {/* CreditWise Section */}
