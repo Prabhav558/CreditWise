@@ -4,14 +4,13 @@
 // Expect grounded answers from the hardcoded context in the edge function.
 
 import { useState } from "react";
-import { Bot, X, Minimize2, Send, Sparkles } from "lucide-react";
+import { MessageCircle, X, Minimize2, Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { askCreditWise } from "@/api";
 import { useToast } from "@/hooks/use-toast";
-import chatbotLogo from "@/assets/chatbot-logo.png";
 
 interface Message {
   id: string;
@@ -100,11 +99,7 @@ export default function FloatingChatbot() {
             
             {/* Main content */}
             <div className="relative z-10 flex items-center justify-center w-full h-full">
-              <img 
-                src={chatbotLogo} 
-                alt="CreditWise Assistant" 
-                className="w-10 h-10 rounded-full transition-transform duration-300 group-hover:rotate-12"
-              />
+              <MessageCircle className="w-8 h-8 text-primary-foreground transition-transform duration-300 group-hover:rotate-12" />
               <Sparkles className="absolute -top-1 -right-1 w-4 h-4 text-accent animate-pulse opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
             
@@ -128,11 +123,7 @@ export default function FloatingChatbot() {
             
             <div className="flex items-center gap-3 relative z-10">
               <div className="relative">
-                <img 
-                  src={chatbotLogo} 
-                  alt="CreditWise Assistant" 
-                  className="w-6 h-6 rounded-full"
-                />
+                <MessageCircle className="w-6 h-6 text-primary-foreground" />
                 <div className="absolute -inset-1 rounded-full bg-accent/20 blur-sm"></div>
               </div>
               <span className="font-semibold text-primary-foreground">CreditWise Assistant</span>
