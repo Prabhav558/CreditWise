@@ -11,16 +11,16 @@ const Hero = () => {
       </div>
 
       <div className="relative mx-auto max-w-4xl text-center py-16 md:py-24 animate-enter">
-        <div className="inline-flex items-center gap-2 rounded-full border border-accent/20 px-4 py-2 text-xs md:text-sm bg-white/80 backdrop-blur-sm shadow-soft">
+        <div className="inline-flex items-center gap-2 rounded-full border border-accent/20 px-4 py-2 text-xs md:text-sm bg-card/80 backdrop-blur-sm shadow-soft">
           <Shield className="text-accent" size={16} />
-          <span className="text-primary font-medium">CreditWise — Alternative Data Credit Risk</span>
+          <span className="text-foreground font-medium">CreditWise — Alternative Data Credit Risk</span>
         </div>
         <h1 className="mt-8 text-4xl md:text-7xl font-bold tracking-tight leading-tight">
-          <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-accent via-primary to-accent bg-clip-text text-transparent">
             Credit Risk Prediction
           </span>
           <br />
-          <span className="text-primary/80">Engine</span>
+          <span className="text-foreground/80">Engine</span>
         </h1>
         <p className="mt-6 md:mt-8 text-muted-foreground text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
           Predict Probability of Default using <span className="text-accent font-medium">alternative behavioral signals</span>. Upload your dataset and assess risk instantly with our AI-powered analytics.
@@ -31,11 +31,11 @@ const Hero = () => {
               Get Started
             </Button>
           </a>
-          <a className="story-link text-primary hover:text-accent transition-colors duration-200 font-medium" href="/how-it-works">
+          <a className="story-link text-foreground hover:text-accent transition-colors duration-200 font-medium" href="/how-it-works">
             How it works →
           </a>
         </div>
-        <div className="mt-12 inline-flex items-center gap-2 text-sm text-muted-foreground bg-white/50 backdrop-blur-sm px-4 py-2 rounded-full border border-gray-200/50">
+        <div className="mt-12 inline-flex items-center gap-2 text-sm text-muted-foreground bg-card/50 backdrop-blur-sm px-4 py-2 rounded-full border border-border/50">
           <TrendingUp className="text-accent" size={16} /> 
           <span>Real-time monitoring ready</span>
         </div>

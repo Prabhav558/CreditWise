@@ -65,48 +65,51 @@ All colors MUST be HSL.
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
+    --background: 222.2 84% 3.5%;
     --foreground: 210 40% 98%;
 
-    --card: 222.2 84% 4.9%;
+    --card: 217.2 32.6% 6%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 84% 4.9%;
+    --popover: 217.2 32.6% 6%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
+    --primary: 262 90% 68%;
+    --primary-foreground: 222.2 84% 3.5%;
 
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 217.2 32.6% 12%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 217.2 32.6% 10%;
+    --muted-foreground: 215 20.2% 70%;
 
     --accent: 262 90% 66%;
-    --accent-foreground: 210 40% 98%;
+    --accent-foreground: 222.2 84% 3.5%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 75% 65%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
+    --border: 217.2 32.6% 15%;
+    --input: 217.2 32.6% 8%;
+    --ring: 262 90% 66%;
+    
+    --sidebar-background: 217.2 32.6% 4%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-primary: 262 90% 66%;
+    --sidebar-primary-foreground: 222.2 84% 3.5%;
+    --sidebar-accent: 217.2 32.6% 8%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-border: 217.2 32.6% 15%;
+    --sidebar-ring: 262 90% 66%;
 
-    /* CreditWise dark tweaks */
-    --primary-glow: 222.2 70% 80%;
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
-    --gradient-subtle: linear-gradient(180deg, hsl(222.2 84% 6%), hsl(222.2 84% 4.9%));
-    --shadow-elegant: 0 10px 30px -12px hsl(var(--accent) / 0.35);
-    --shadow-glow: 0 12px 45px -14px hsl(var(--accent) / 0.6);
+    /* CreditWise dark theme enhancements */
+    --primary-glow: 262 90% 80%;
+    --gradient-primary: linear-gradient(135deg, hsl(262 90% 66%), hsl(262 95% 75%));
+    --gradient-subtle: linear-gradient(180deg, hsl(222.2 84% 4%), hsl(222.2 84% 3.5%));
+    --gradient-hero: linear-gradient(135deg, hsl(262 90% 66%) 0%, hsl(262 95% 75%) 100%);
+    --shadow-elegant: 0 10px 30px -12px hsl(262 90% 66% / 0.4);
+    --shadow-glow: 0 12px 45px -14px hsl(262 90% 66% / 0.6);
+    --shadow-soft: 0 4px 20px -4px hsl(262 90% 66% / 0.25);
   }
 }
 

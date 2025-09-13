@@ -30,7 +30,7 @@ const HowItWorks = () => {
           <div className="grid md:grid-cols-4 gap-6 mb-12">
             <div className="text-center">
               <div className="bg-gradient-primary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Upload className="w-8 h-8 text-white" />
+                <Upload className="w-8 h-8 text-primary-foreground" />
               </div>
               <h3 className="text-lg font-semibold mb-2">1. Upload Data</h3>
               <p className="text-muted-foreground text-sm">
@@ -40,7 +40,7 @@ const HowItWorks = () => {
 
             <div className="text-center">
               <div className="bg-gradient-primary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Brain className="w-8 h-8 text-white" />
+                <Brain className="w-8 h-8 text-primary-foreground" />
               </div>
               <h3 className="text-lg font-semibold mb-2">2. AI Analysis</h3>
               <p className="text-muted-foreground text-sm">
@@ -50,7 +50,7 @@ const HowItWorks = () => {
 
             <div className="text-center">
               <div className="bg-gradient-primary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <BarChart3 className="w-8 h-8 text-white" />
+                <BarChart3 className="w-8 h-8 text-primary-foreground" />
               </div>
               <h3 className="text-lg font-semibold mb-2">3. Risk Scoring</h3>
               <p className="text-muted-foreground text-sm">
@@ -60,7 +60,7 @@ const HowItWorks = () => {
 
             <div className="text-center">
               <div className="bg-gradient-primary w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Download className="w-8 h-8 text-white" />
+                <Download className="w-8 h-8 text-primary-foreground" />
               </div>
               <h3 className="text-lg font-semibold mb-2">4. Export Results</h3>
               <p className="text-muted-foreground text-sm">
