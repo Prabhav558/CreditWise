@@ -1,8 +1,8 @@
-# CreditWiese
+# Welcome to your Lovable project
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/83a8a7c8-c6b5-4a77-a17d-df80903055b5
+**URL**: https://lovable.dev/projects/dd6009bf-5fda-4ac3-91bd-a55d22983abb
 
 ## How can I edit this code?
 
@@ -10,7 +10,7 @@ There are several ways of editing your application.
 
 **Use Lovable**
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/83a8a7c8-c6b5-4a77-a17d-df80903055b5) and start prompting.
+Simply visit the [Lovable Project](https://lovable.dev/projects/dd6009bf-5fda-4ac3-91bd-a55d22983abb) and start prompting.
 
 Changes made via Lovable will be committed automatically to this repo.
 
