@@ -1,8 +1,3 @@
-// Test:
-// 1) Ask: "What does FinShield predict?"
-// 2) Ask: "List the dataset features."
-// Expect grounded answers from the hardcoded context in the edge function.
-
 import { useState } from "react";
 import { MessageCircle, X, Minimize2, Send, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";

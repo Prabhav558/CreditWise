@@ -54,7 +54,7 @@ const SyntheticData = () => {
       .map(row => row[columnName])
       .filter(val => !isEmptyValue(val));
 
-    console.log(`Analyzing column "${columnName}": ${validValues.length} valid values out of ${allData.length} total`);
+    
     
     if (validValues.length === 0) {
       return { type: 'unknown', values: [], stats: null };
@@ -196,7 +196,7 @@ const SyntheticData = () => {
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' }); // Use empty string as default
         
-        console.log('Raw data loaded:', jsonData);
+        
         setCsvData(jsonData as CSVData[]);
         
         toast({
@@ -226,14 +226,14 @@ const SyntheticData = () => {
       return;
     }
 
-    console.log('Starting data processing...');
+    
     setIsProcessing(true);
     
     setTimeout(() => {
       try {
         // Get all column names from the first row
         const columns = Object.keys(csvData[0] || {});
-        console.log('Columns found:', columns);
+        
         
         // Analyze each column
         const columnAnalysis: { [key: string]: any } = {};
@@ -241,7 +241,7 @@ const SyntheticData = () => {
           columnAnalysis[column] = analyzeColumnData(column, csvData);
         });
         
-        console.log('Column analysis:', columnAnalysis);
+        
         
         let totalEmptyCells = 0;
         let totalFilledCells = 0;
@@ -258,14 +258,14 @@ const SyntheticData = () => {
               const generatedValue = generateValueForColumn(column, columnAnalysis[column]);
               newRow[column] = generatedValue;
               totalFilledCells++;
-              console.log(`Row ${rowIndex}, Column "${column}": "${currentValue}" -> "${generatedValue}"`);
+              
             }
           });
           
           return newRow;
         });
         
-        console.log(`Processing complete: Found ${totalEmptyCells} empty cells, filled ${totalFilledCells} cells`);
+        
         
         setProcessedData(processed);
         setIsProcessing(false);
