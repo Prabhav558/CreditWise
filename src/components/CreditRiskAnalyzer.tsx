@@ -45,36 +45,9 @@ export type UserRow = Record<string, string | number | undefined> & {
 };
 
 const demoData: UserRow[] = [
-  {
-    user_id: "U-1024",
-    default_flag: 0,
-    payment_delay_ratio: 0.12,
-    avg_recharge_amt: 350,
-    avg_order_value: 1200,
-    cart_abandonment_rate: 0.18,
-    geo_variance_score: 2.1,
-    months_active: 18,
-  },
-  {
-    user_id: "U-2048",
-    default_flag: 0,
-    payment_delay_ratio: 0.35,
-    avg_recharge_amt: 240,
-    avg_order_value: 800,
-    cart_abandonment_rate: 0.42,
-    geo_variance_score: 4.5,
-    months_active: 7,
-  },
-  {
-    user_id: "U-4096",
-    default_flag: 1,
-    payment_delay_ratio: 0.62,
-    avg_recharge_amt: 150,
-    avg_order_value: 560,
-    cart_abandonment_rate: 0.58,
-    geo_variance_score: 7.4,
-    months_active: 3,
-  },
+  { user_id: "U-1024", default_flag: 0, payment_delay_ratio: 0.12, avg_recharge_amt: 350, avg_order_value: 1200, cart_abandonment_rate: 0.18, geo_variance_score: 2.1, months_active: 18 },
+  { user_id: "U-2048", default_flag: 0, payment_delay_ratio: 0.35, avg_recharge_amt: 240, avg_order_value: 800,  cart_abandonment_rate: 0.42, geo_variance_score: 4.5, months_active: 7  },
+  { user_id: "U-4096", default_flag: 1, payment_delay_ratio: 0.62, avg_recharge_amt: 150, avg_order_value: 560,  cart_abandonment_rate: 0.58, geo_variance_score: 7.4, months_active: 3  },
 ];
 
 function toNumber(v: unknown): number {
@@ -197,16 +170,16 @@ const CreditRiskAnalyzer = () => {
       complete: (result) => {
         const clean: UserRow[] = (result.data as any[]).map((r) => ({
           ...r,
-            user_id: r.user_id ?? r.id ?? r.user ?? r["User ID"],
-            default_flag: toNumber(r.default_flag),
-            payment_delay_ratio: toNumber(r.payment_delay_ratio),
-            avg_recharge_amt: toNumber(r.avg_recharge_amt),
-            avg_order_value: toNumber(r.avg_order_value),
-            cart_abandonment_rate: toNumber(r.cart_abandonment_rate),
-            geo_variance_score: toNumber(r.geo_variance_score),
-            months_active: toNumber(r.months_active),
-            pd_score: toNumber(r.pd_score),
-            prediction_proba: toNumber(r.prediction_proba),
+          user_id: r.user_id ?? r.id ?? r.user ?? r["User ID"],
+          default_flag: toNumber(r.default_flag),
+          payment_delay_ratio: toNumber(r.payment_delay_ratio),
+          avg_recharge_amt: toNumber(r.avg_recharge_amt),
+          avg_order_value: toNumber(r.avg_order_value),
+          cart_abandonment_rate: toNumber(r.cart_abandonment_rate),
+          geo_variance_score: toNumber(r.geo_variance_score),
+          months_active: toNumber(r.months_active),
+          pd_score: toNumber(r.pd_score),
+          prediction_proba: toNumber(r.prediction_proba),
         }));
         setRows(clean);
         setSelected("");
@@ -225,7 +198,7 @@ const CreditRiskAnalyzer = () => {
     });
   };
 
-  // UPDATED: first try API predict, fallback to local computePD (no UI changes)
+  // UPDATED: first try API predict, fallback to local computePD (now with 2s delay & silent API failure)
   const onAnalyze = async () => {
     if (!selectedRow) {
       toast({ title: "Select a user", description: "Choose a User ID before analyzing." });
@@ -241,6 +214,9 @@ const CreditRiskAnalyzer = () => {
       features[k] = Number.isFinite(n) ? n : v;
     });
 
+    // ⏳ small artificial delay for smoother UX
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     try {
       const data = await predictViaApi(features);
       const pdPct = clamp(data.probability_of_default * 100, 0, 100);
@@ -251,14 +227,10 @@ const CreditRiskAnalyzer = () => {
         description: `PD ${pdPct.toFixed(2)}% • Credit Score ${data.credit_score}`,
       });
     } catch (e: any) {
-      // Fallback to local calculation if API fails
+      console.info("Predict API failed; using local PD fallback:", e?.message ?? e);
       const score = computePD(selectedRow, stats);
       setPdScore(score);
-      const c = category(score);
-      toast({
-        title: `Risk (Local): ${c.label}`,
-        description: `PD Score ${score.toFixed(2)}% (API unreachable)`,
-      });
+      // no toast shown here
     }
   };
 
@@ -272,8 +244,8 @@ const CreditRiskAnalyzer = () => {
   /**
    * Download with row-level coloring based on pd_score using ExcelJS:
    *  0  - 20  => Green
-   *  >20- 80  => Yellow
-   *  >80-100  => Red
+   *  >20- 59.9 => Yellow
+   *  ≥60-100  => Red
    */
   const downloadExcel = async () => {
     if (rows.length === 0) {
@@ -285,74 +257,48 @@ const CreditRiskAnalyzer = () => {
       return;
     }
 
-    // Recompute PD and generate updated data
     const updatedData = rows.map((row) => {
       const pdValue = computePD(row, stats); // 0..100
       return {
         ...row,
         default_flag: pdValue / 100, // probability (0..1)
-        prediction_proba: Math.random(), // random sample probability
-        pd_score: Math.round(pdValue), // integer PD score 0..100
+        prediction_proba: Math.random(), // sample probability
+        pd_score: Math.round(pdValue), // integer PD 0..100
       };
     });
 
-    // Create new workbook and worksheet
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Risk Analysis');
 
-    // Get headers
     const headers = Object.keys(updatedData[0]);
-    const pdScoreColIndex = headers.indexOf("pd_score") + 1; // ExcelJS is 1-indexed
+    const pdScoreColIndex = headers.indexOf("pd_score") + 1;
 
-    // Add headers with styling
     worksheet.addRow(headers);
     worksheet.getRow(1).font = { bold: true };
-    worksheet.getRow(1).fill = {
-      type: 'pattern',
-      pattern: 'solid',
-      fgColor: { argb: 'FFF3F4F6' }
-    };
+    worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF3F4F6' } };
 
-    // Add data rows with conditional formatting
     updatedData.forEach((row) => {
-      const rowData = headers.map(header => row[header]);
+      const rowData = headers.map(header => (row as any)[header]);
       const worksheetRow = worksheet.addRow(rowData);
-      
-      // Get PD score for this row
+
       const pdScore = (row as any).pd_score || 0;
-      
-      // Determine row color based on PD score
-      let fillColor = 'FFFFFFFF'; // default white
-      if (pdScore <= 20) {
-        fillColor = 'FF22C55E'; // green
-      } else if (pdScore <= 59.9) {
-        fillColor = 'FFEAB308'; // yellow  
-      } else {
-        fillColor = 'FFEF4444'; // red
-      }
-      
-      // Apply fill only to pd_score cell
+
+      let fillColor = 'FFFFFFFF';
+      if (pdScore <= 20) fillColor = 'FF22C55E';
+      else if (pdScore <= 59.9) fillColor = 'FFEAB308';
+      else fillColor = 'FFEF4444';
+
       if (pdScoreColIndex > 0) {
         const pdCell = worksheetRow.getCell(pdScoreColIndex);
-        pdCell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: fillColor }
-        };
+        pdCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: fillColor } };
       }
     });
 
-    // Auto-size columns
-    worksheet.columns.forEach((column) => {
-      column.width = 15;
-    });
+    worksheet.columns.forEach((column) => { column.width = 15; });
 
-    // Generate buffer and download
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { 
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
-    });
-    
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
@@ -360,14 +306,11 @@ const CreditRiskAnalyzer = () => {
     link.click();
     window.URL.revokeObjectURL(url);
 
-    toast({
-      title: "Excel downloaded",
-      description: `${updatedData.length} rows exported with PD-based row coloring.`,
-    });
+    toast({ title: "Excel downloaded", description: `${updatedData.length} rows exported with PD-based row coloring.` });
   };
 
   const analyzeIndividualUser = () => {
-    // (individual analysis removed for brevity; unchanged logic could go here if still needed)
+    // (individual analysis placeholder)
   };
 
   const risk = pdScore != null ? category(pdScore) : null;
@@ -401,31 +344,20 @@ const CreditRiskAnalyzer = () => {
                   if (file) handleFile(file);
                 }}
               />
-              <Button
-                variant="outline"
-                onClick={() => fileRef.current?.click()}
-                className="w-full md:w-auto"
-              >
+              <Button variant="outline" onClick={() => fileRef.current?.click()} className="w-full md:w-auto">
                 <Upload className="mr-2" size={16} /> Upload CSV
               </Button>
               <Button variant="secondary" onClick={loadDemo} className="w-full md:w-auto">
                 <Sparkles className="mr-2" size={16} /> Load Demo Data
               </Button>
-              <Button
-                variant="outline"
-                onClick={downloadExcel}
-                className="w-full md:w-auto"
-                disabled={rows.length === 0}
-              >
+              <Button variant="outline" onClick={downloadExcel} className="w-full md:w-auto" disabled={rows.length === 0}>
                 <Download className="mr-2" size={16} /> Download Excel
               </Button>
               <div className="flex-1" />
               <div className="w-full md:w-72">
                 <Select value={selected} onValueChange={setSelected}>
                   <SelectTrigger>
-                    <SelectValue
-                      placeholder={rows.length ? "Select User ID" : "Load data to select"}
-                    />
+                    <SelectValue placeholder={rows.length ? "Select User ID" : "Load data to select"} />
                   </SelectTrigger>
                   <SelectContent>
                     {userIds.map((id) => (
@@ -449,7 +381,6 @@ const CreditRiskAnalyzer = () => {
               </div>
             ) : (
               <div className="space-y-8 animate-fade-in">
-                {/* Main Dashboard Header with PD Score */}
                 <div className="text-center space-y-4">
                   <div className="space-y-2">
                     <h2 className="text-2xl font-bold">Risk Assessment Dashboard</h2>
@@ -472,71 +403,37 @@ const CreditRiskAnalyzer = () => {
                         </Badge>
                       )}
                     </div>
-                    <p className="text-lg text-muted-foreground">
-                      Probability of Default
-                    </p>
+                    <p className="text-lg text-muted-foreground">Probability of Default</p>
                   </div>
                 </div>
 
-                {/* Key Behavioral Markers */}
                 <div className="space-y-4">
-                  <h3 className="text-xl font-semibold text-center">
-                    Key Behavioral Markers
-                  </h3>
+                  <h3 className="text-xl font-semibold text-center">Key Behavioral Markers</h3>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 justify-items-center">
-                    <SpeedometerGauge
-                      value={toNumber(selectedRow.payment_delay_ratio)}
-                      max={1}
-                      title="Payment Delay Ratio"
-                      unit="%"
-                      size={140}
-                    />
-                    <SpeedometerGauge
-                      value={toNumber(selectedRow.cart_abandonment_rate)}
-                      max={1}
-                      title="Cart Abandonment Rate"
-                      unit="%"
-                      size={140}
-                    />
-                    <SpeedometerGauge
-                      value={toNumber(selectedRow.geo_variance_score)}
-                      max={10}
-                      title="Geo-variance Score"
-                      unit=""
-                      size={140}
-                    />
+                    <SpeedometerGauge value={toNumber(selectedRow.payment_delay_ratio)} max={1}  title="Payment Delay Ratio"  unit="%" size={140} />
+                    <SpeedometerGauge value={toNumber(selectedRow.cart_abandonment_rate)} max={1} title="Cart Abandonment Rate" unit="%" size={140} />
+                    <SpeedometerGauge value={toNumber(selectedRow.geo_variance_score)}   max={10} title="Geo-variance Score"    unit=""   size={140} />
                   </div>
                 </div>
 
-                {/* Example metrics (unchanged layout) */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div className="rounded-xl border bg-card p-6 shadow-sm hover:shadow-md transition-shadow">
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-muted-foreground">
-                          Avg. Recharge Amount
-                        </span>
-                        <span className="text-2xl font-bold text-primary">
-                          ₹{toNumber(selectedRow.avg_recharge_amt).toFixed(0)}
-                        </span>
+                        <span className="text-sm font-medium text-muted-foreground">Avg. Recharge Amount</span>
+                        <span className="text-2xl font-bold text-primary">₹{toNumber(selectedRow.avg_recharge_amt).toFixed(0)}</span>
                       </div>
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-500 ${
-                            pdScore < 30
-                              ? "bg-gradient-to-r from-green-500 to-green-400"
-                              : pdScore < 60
-                              ? "bg-gradient-to-r from-yellow-500 to-yellow-400"
-                              : "bg-gradient-to-r from-red-500 to-red-400"
+                            pdScore < 30 ? "bg-gradient-to-r from-green-500 to-green-400"
+                          : pdScore < 60 ? "bg-gradient-to-r from-yellow-500 to-yellow-400"
+                                         : "bg-gradient-to-r from-red-500 to-red-400"
                           }`}
                           style={{
                             width: `${Math.min(
                               (toNumber(selectedRow.avg_recharge_amt) /
-                                Math.max(
-                                  1000,
-                                  toNumber(selectedRow.avg_recharge_amt) * 1.5
-                                )) *
-                                100,
+                                Math.max(1000, toNumber(selectedRow.avg_recharge_amt) * 1.5)) * 100,
                               100
                             )}%`,
                           }}
@@ -548,30 +445,20 @@ const CreditRiskAnalyzer = () => {
                   <div className="rounded-xl border bg-card p-6 shadow-sm hover:shadow-md transition-shadow">
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-muted-foreground">
-                          Avg. Order Value
-                        </span>
-                        <span className="text-2xl font-bold text-primary">
-                          ₹{toNumber(selectedRow.avg_order_value).toFixed(0)}
-                        </span>
+                        <span className="text-sm font-medium text-muted-foreground">Avg. Order Value</span>
+                        <span className="text-2xl font-bold text-primary">₹{toNumber(selectedRow.avg_order_value).toFixed(0)}</span>
                       </div>
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-500 ${
-                            pdScore < 30
-                              ? "bg-gradient-to-r from-green-500 to-green-400"
-                              : pdScore < 60
-                              ? "bg-gradient-to-r from-yellow-500 to-yellow-400"
-                              : "bg-gradient-to-r from-red-500 to-red-400"
+                            pdScore < 30 ? "bg-gradient-to-r from-green-500 to-green-400"
+                          : pdScore < 60 ? "bg-gradient-to-r from-yellow-500 to-yellow-400"
+                                         : "bg-gradient-to-r from-red-500 to-red-400"
                           }`}
                           style={{
                             width: `${Math.min(
                               (toNumber(selectedRow.avg_order_value) /
-                                Math.max(
-                                  2000,
-                                  toNumber(selectedRow.avg_order_value) * 1.5
-                                )) *
-                                100,
+                                Math.max(2000, toNumber(selectedRow.avg_order_value) * 1.5)) * 100,
                               100
                             )}%`,
                           }}
@@ -583,30 +470,20 @@ const CreditRiskAnalyzer = () => {
                   <div className="rounded-xl border bg-card p-6 shadow-sm hover:shadow-md transition-shadow">
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
-                        <span className="text-sm font-medium text-muted-foreground">
-                          Months Active
-                        </span>
-                        <span className="text-2xl font-bold text-primary">
-                          {toNumber(selectedRow.months_active)} months
-                        </span>
+                        <span className="text-sm font-medium text-muted-foreground">Months Active</span>
+                        <span className="text-2xl font-bold text-primary">{toNumber(selectedRow.months_active)} months</span>
                       </div>
                       <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all duration-500 ${
-                            pdScore < 30
-                              ? "bg-gradient-to-r from-green-500 to-green-400"
-                              : pdScore < 60
-                              ? "bg-gradient-to-r from-yellow-500 to-yellow-400"
-                              : "bg-gradient-to-r from-red-500 to-red-400"
+                            pdScore < 30 ? "bg-gradient-to-r from-green-500 to-green-400"
+                          : pdScore < 60 ? "bg-gradient-to-r from-yellow-500 to-yellow-400"
+                                         : "bg-gradient-to-r from-red-500 to-red-400"
                           }`}
                           style={{
                             width: `${Math.min(
                               (toNumber(selectedRow.months_active) /
-                                Math.max(
-                                  24,
-                                  toNumber(selectedRow.months_active) * 1.5
-                                )) *
-                                100,
+                                Math.max(24, toNumber(selectedRow.months_active) * 1.5)) * 100,
                               100
                             )}%`,
                           }}

@@ -43,8 +43,51 @@ function parseFeatures(message: string): Record<string, unknown> | null {
   return kvCount > 0 ? maybeKV : null;
 }
 
+/* ---------- Meta cache + value coercion ---------- */
+let _metaCache: { expected_features: string[] | null } | null = null;
+
+async function getMeta() {
+  if (_metaCache) return _metaCache;
+  const res = await fetch(`${API_BASE}/meta`);
+  if (!res.ok) throw new Error(`Meta error ${res.status}`);
+  _metaCache = await res.json();
+  return _metaCache!;
+}
+
+function toNumOrKeep(v: unknown) {
+  if (v == null) return null;
+  if (typeof v === "string" && v.trim() === "") return null;
+  const n = Number(v);
+  return Number.isFinite(n) ? n : v; // keep strings for categorical encoders
+}
+/* ----------------------------------------------- */
+
 /** Call FastAPI /predict */
-async function predictViaApi(features: Record<string, unknown>) {
+async function predictViaApi(featuresRaw: Record<string, unknown>) {
+  let features: Record<string, unknown> = featuresRaw;
+
+  try {
+    const meta = await getMeta();
+    const expected = meta?.expected_features;
+
+    if (Array.isArray(expected) && expected.length) {
+      // Align with expected features; send nulls where missing
+      features = Object.fromEntries(
+        expected.map((k) => [k, toNumOrKeep(featuresRaw[k])])
+      );
+    } else {
+      // Best-effort sanitize when expected_features is null
+      features = Object.fromEntries(
+        Object.entries(featuresRaw).map(([k, v]) => [k, toNumOrKeep(v)])
+      );
+    }
+  } catch {
+    // If /meta fails, just sanitize best-effort
+    features = Object.fromEntries(
+      Object.entries(featuresRaw).map(([k, v]) => [k, toNumOrKeep(v)])
+    );
+  }
+
   const res = await fetch(`${API_BASE}/predict`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -87,17 +130,14 @@ async function predictViaApi(features: Record<string, unknown>) {
 export async function askCreditWise(message: string) {
   const features = parseFeatures(message);
 
-  // If it's a scoring-style message, try FastAPI first.
   if (features) {
     try {
       return await predictViaApi(features);
     } catch (err) {
-      // If API fails, fall back to chat so UX doesn’t dead-end
       console.warn("Predict API failed, falling back to chat:", err);
     }
   }
 
-  // Original chatbot behavior (unchanged)
   const { data, error } = await supabase.functions.invoke("chat", {
     body: { message },
   });
