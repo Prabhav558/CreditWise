@@ -213,16 +213,11 @@ const CreditRiskAnalyzer = () => {
     
     setIsAnalyzing(true);
     
-    // Random delay between 2-4 seconds to simulate AI processing
-    const delay = Math.random() * 2000 + 2000; // 2000-4000ms
-    
-    setTimeout(() => {
-      const score = computePD(selectedRow, stats);
-      setPdScore(score);
-      const c = category(score);
-      toast({ title: `Risk: ${c.label}`, description: `PD Score ${score.toFixed(2)}%` });
-      setIsAnalyzing(false);
-    }, delay);
+    const score = computePD(selectedRow, stats);
+    setPdScore(score);
+    const c = category(score);
+    toast({ title: `Risk: ${c.label}`, description: `PD Score ${score.toFixed(2)}%` });
+    setIsAnalyzing(false);
   };
 
   const loadDemo = () => {

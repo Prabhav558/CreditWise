@@ -94,9 +94,6 @@ const IndividualAssessment = () => {
     setIsCalculating(true);
     
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
       const { risk_score, risk_category } = calculateRiskScore(data);
       
       const result: AssessmentResult = {
