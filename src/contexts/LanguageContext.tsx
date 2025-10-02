@@ -14,6 +14,7 @@ const translations = {
   en: {
     // Navigation
     'nav.defaulter': 'Defaulter Search & Tracking',
+    'nav.riskDashboard': 'Risk Dashboard',
     'nav.individual': 'Individual Risk Assessment',
     'nav.synthetic': 'Synthetic Data Generator',
     'nav.howItWorks': 'How it Works',
@@ -37,6 +38,7 @@ const translations = {
   es: {
     // Navigation
     'nav.defaulter': 'Búsqueda y Seguimiento de Morosos',
+    'nav.riskDashboard': 'Panel de Riesgo',
     'nav.individual': 'Evaluación Individual de Riesgo',
     'nav.synthetic': 'Generador de Datos Sintéticos',
     'nav.howItWorks': 'Cómo Funciona',
@@ -60,6 +62,7 @@ const translations = {
   fr: {
     // Navigation
     'nav.defaulter': 'Recherche et Suivi des Défaillants',
+    'nav.riskDashboard': 'Tableau de Bord des Risques',
     'nav.individual': 'Évaluation Individuelle du Risque',
     'nav.synthetic': 'Générateur de Données Synthétiques',
     'nav.howItWorks': 'Comment ça Marche',
@@ -83,6 +86,7 @@ const translations = {
   de: {
     // Navigation
     'nav.defaulter': 'Zahlungsausfall-Suche & Verfolgung',
+    'nav.riskDashboard': 'Risiko-Dashboard',
     'nav.individual': 'Individuelle Risikobewertung',
     'nav.synthetic': 'Synthetischer Datengenerator',
     'nav.howItWorks': 'Wie es Funktioniert',
@@ -106,6 +110,7 @@ const translations = {
   zh: {
     // Navigation
     'nav.defaulter': '违约者搜索与跟踪',
+    'nav.riskDashboard': '风险仪表板',
     'nav.individual': '个人风险评估',
     'nav.synthetic': '合成数据生成器',
     'nav.howItWorks': '工作原理',

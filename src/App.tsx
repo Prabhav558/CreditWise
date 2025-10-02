@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import Navigation from "@/components/Navigation";
 import DefaulterTracking from "./pages/DefaulterTracking";
+import RiskDashboard from "./pages/RiskDashboard";
 import IndividualAssessment from "./pages/IndividualAssessment";
 import SyntheticData from "./pages/SyntheticData";
 import HowItWorks from "./pages/HowItWorks";
@@ -26,6 +27,7 @@ const App = () => (
               <Navigation />
               <Routes>
                 <Route path="/" element={<DefaulterTracking />} />
+                <Route path="/risk-dashboard" element={<RiskDashboard />} />
                 <Route path="/individual-assessment" element={<IndividualAssessment />} />
                 <Route path="/synthetic-data" element={<SyntheticData />} />
                 <Route path="/how-it-works" element={<HowItWorks />} />

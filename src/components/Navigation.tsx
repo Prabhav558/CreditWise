@@ -11,6 +11,7 @@ const Navigation = () => {
   
   const navItems = [
     { path: "/", label: t('nav.defaulter') },
+    { path: "/risk-dashboard", label: t('nav.riskDashboard') },
     { path: "/individual-assessment", label: t('nav.individual') },
     { path: "/synthetic-data", label: t('nav.synthetic') },
     { path: "/how-it-works", label: t('nav.howItWorks') }
