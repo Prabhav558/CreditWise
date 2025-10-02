@@ -1,10 +1,10 @@
-import Hero from "@/components/Hero";
 import FloatingChatbot from "@/components/FloatingChatbot";
 import Footer from "@/components/Footer";
 import CSVIngest from "@/components/risk/CSVIngest";
 import UserList from "@/components/risk/UserList";
 import PDTrendChart from "@/components/risk/PDTrendChart";
 import DeleteDataButton from "@/components/risk/DeleteDataButton";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -77,8 +77,39 @@ function RiskDashboardContent() {
   };
 
   return (
-    <main>
-      <Hero />
+    <div>
+      <header className="relative overflow-hidden bg-gradient-subtle">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-24 -left-24 size-[420px] rounded-full blur-3xl opacity-30 bg-gradient-to-br from-accent/40 to-primary/40" />
+          <div className="absolute -bottom-24 -right-24 size-[420px] rounded-full blur-3xl opacity-25 bg-gradient-to-br from-primary/40 to-accent/40" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 size-[600px] rounded-full blur-3xl opacity-10 bg-gradient-to-br from-accent to-primary" />
+        </div>
+
+        <div className="relative mx-auto max-w-4xl text-center py-16 md:py-24 animate-enter">
+          <h1 className="text-4xl md:text-7xl font-bold tracking-tight leading-tight">
+            <span className="bg-gradient-to-r from-accent via-primary to-accent bg-clip-text text-transparent">
+              Risk Analysis
+            </span>
+            <br />
+            <span className="text-foreground/80">Dashboard</span>
+          </h1>
+          <p className="mt-6 md:mt-8 text-muted-foreground text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
+            Track and analyze borrower risk over time with <span className="text-accent font-medium">comprehensive trend analysis</span> and real-time risk monitoring.
+          </p>
+          <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="#dashboard" className="hover-scale">
+              <Button size="lg" className="px-8 py-3 bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                View Dashboard
+              </Button>
+            </a>
+            <a className="story-link text-foreground hover:text-accent transition-all duration-300 font-medium hover-scale" href="/how-it-works">
+              How it works →
+            </a>
+          </div>
+        </div>
+      </header>
+
+      <main id="dashboard">
       
       {/* CSV Upload Section */}
       <section className="py-8 border-b">
@@ -209,7 +240,8 @@ function RiskDashboardContent() {
       
       <FloatingChatbot />
       <Footer />
-    </main>
+      </main>
+    </div>
   );
 }
 
