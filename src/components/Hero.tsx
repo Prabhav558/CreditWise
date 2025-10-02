@@ -1,7 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { Shield, TrendingUp } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Hero = () => {
+  const { t } = useLanguage();
   return (
     <header className="relative overflow-hidden bg-gradient-subtle">
       <div className="absolute inset-0 pointer-events-none">
@@ -13,22 +14,22 @@ const Hero = () => {
       <div className="relative mx-auto max-w-4xl text-center py-16 md:py-24 animate-enter">
         <h1 className="text-4xl md:text-7xl font-bold tracking-tight leading-tight">
           <span className="bg-gradient-to-r from-accent via-primary to-accent bg-clip-text text-transparent">
-            Credit Risk Prediction
+            {t('hero.title1')}
           </span>
           <br />
-          <span className="text-foreground/80">Engine</span>
+          <span className="text-foreground/80">{t('hero.title2')}</span>
         </h1>
         <p className="mt-6 md:mt-8 text-muted-foreground text-lg md:text-xl max-w-3xl mx-auto leading-relaxed">
-          Predict Probability of Default using <span className="text-accent font-medium">alternative behavioral signals</span>. Upload your dataset and assess risk instantly with our AI-powered analytics.
+          {t('hero.subtitle')} <span className="text-accent font-medium">{t('hero.subtitleHighlight')}</span>{t('hero.subtitleEnd')}
         </p>
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <a href="#analyzer" className="hover-scale">
             <Button size="lg" className="px-8 py-3 bg-gradient-to-r from-accent to-primary hover:from-accent/90 hover:to-primary/90 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
-              Get Started
+              {t('hero.getStarted')}
             </Button>
           </a>
           <a className="story-link text-foreground hover:text-accent transition-all duration-300 font-medium hover-scale" href="/how-it-works">
-            How it works →
+            {t('hero.howItWorks')}
           </a>
         </div>
       </div>
