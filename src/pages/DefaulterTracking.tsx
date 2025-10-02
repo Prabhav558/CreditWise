@@ -214,7 +214,7 @@ function DefaulterTrackingContent() {
       {/* Original Analyzer Section */}
       <section id="analyzer" className="pb-16 md:pb-24 border-t">
         <div className="container">
-          <h2 className="text-2xl font-bold mb-6">Individual Risk Assessment</h2>
+          <h2 className="text-2xl font-bold mb-6">Group Risk Assessment</h2>
           <CreditRiskAnalyzer />
         </div>
       </section>
