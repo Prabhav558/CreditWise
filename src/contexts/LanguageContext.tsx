@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-export type Language = 'en' | 'es' | 'fr' | 'de' | 'zh';
+export type Language = 'en' | 'es' | 'fr' | 'de' | 'zh' | 'hi';
 
 interface LanguageContextType {
   language: Language;
@@ -755,6 +755,155 @@ const translations = {
     'common.delete': '删除',
     'common.edit': '编辑',
     'common.loading': '加载中...'
+  },
+  hi: {
+    // Navigation
+    'nav.defaulter': 'डिफॉल्टर खोज और ट्रैकिंग',
+    'nav.riskDashboard': 'जोखिम डैशबोर्ड',
+    'nav.individual': 'व्यक्तिगत जोखिम मूल्यांकन',
+    'nav.synthetic': 'सिंथेटिक डेटा जेनरेटर',
+    'nav.howItWorks': 'यह कैसे काम करता है',
+    
+    // Hero
+    'hero.title1': 'क्रेडिट जोखिम पूर्वानुमान',
+    'hero.title2': 'इंजन',
+    'hero.subtitle': 'डिफॉल्ट की संभावना की भविष्यवाणी करें',
+    'hero.subtitleHighlight': 'वैकल्पिक व्यवहार संकेतों',
+    'hero.subtitleEnd': ' का उपयोग करके। अपना डेटासेट अपलोड करें और हमारे AI-संचालित विश्लेषण के साथ तुरंत जोखिम का आकलन करें।',
+    'hero.getStarted': 'शुरू करें',
+    'hero.howItWorks': 'यह कैसे काम करता है →',
+    
+    // Footer
+    'footer.description': 'वैकल्पिक व्यवहार संकेतों और रियल-टाइम डेटा विश्लेषण का उपयोग करके क्रेडिट जोखिम और डिफॉल्ट की संभावना की भविष्यवाणी करने के लिए उन्नत AI तकनीक।',
+    'footer.developers': 'डेवलपर्स',
+    'footer.aboutTech': 'हमारी तकनीक के बारे में',
+    'footer.techDescription': 'सिस्टम एक पूर्व-प्रशिक्षित मशीन लर्निंग मॉडल का उपयोग करके स्वचालित क्रेडिट जोखिम मूल्यांकन करता है। यह व्यवहार डेटा और वित्तीय संकेतकों को लोड करता है, इनपुट चर को संसाधित करता है, डिफॉल्ट संभावना की भविष्यवाणी करता है, क्रेडिट इतिहास के साथ जोखिम कारकों को जोड़ता है, और परिणाम को एक व्यापक जोखिम स्कोर में परिवर्तित करता है।',
+    'footer.contribute': 'GitHub पर योगदान करें',
+    'footer.rights': 'सर्वाधिकार सुरक्षित।',
+    
+    // Chatbot
+    'chatbot.welcome': 'नमस्ते! मैं आपका CreditWise सहायक हूं। आज मैं क्रेडिट जोखिम विश्लेषण में आपकी कैसे मदद कर सकता हूं?',
+    'chatbot.placeholder': 'अपना संदेश टाइप करें...',
+    'chatbot.typing': 'टाइप कर रहा है...',
+    'chatbot.unavailable': 'चैट अस्थायी रूप से अनुपलब्ध है। कृपया फिर से प्रयास करें।',
+    'chatbot.noResponse': 'क्षमा करें, मुझे CreditWise के संदर्भ में यह नहीं मिल सका।',
+    'chatbot.sources': 'स्रोत उपलब्ध',
+    'chatbot.title': 'CreditWise सहायक',
+    
+    // Risk Dashboard
+    'dashboard.title1': 'जोखिम विश्लेषण',
+    'dashboard.title2': 'डैशबोर्ड',
+    'dashboard.subtitle': 'समय के साथ उधारकर्ता जोखिम को ट्रैक और विश्लेषण करें',
+    'dashboard.subtitleHighlight': 'व्यापक ट्रेंड विश्लेषण',
+    'dashboard.subtitleEnd': ' और रियल-टाइम जोखिम निगरानी के साथ।',
+    'dashboard.viewDashboard': 'डैशबोर्ड देखें',
+    'dashboard.pageTitle': 'जोखिम विश्लेषण डैशबोर्ड',
+    'dashboard.users': 'उपयोगकर्ता',
+    'dashboard.rows': 'पंक्तियाँ',
+    'dashboard.columns': 'कॉलम',
+    'dashboard.user': 'उपयोगकर्ता',
+    'dashboard.lowRisk': 'कम जोखिम',
+    'dashboard.mediumRisk': 'मध्यम जोखिम',
+    'dashboard.highRisk': 'उच्च जोखिम',
+    'dashboard.latestPD': 'नवीनतम PD स्कोर',
+    'dashboard.latestMonth': 'नवीनतम महीना',
+    'dashboard.noData': 'इस उपयोगकर्ता के लिए कोई डेटा उपलब्ध नहीं है',
+    'dashboard.riskOverTime': 'समय के साथ जोखिम',
+    'dashboard.all': 'सभी',
+    'dashboard.sixMonths': '6 महीने',
+    'dashboard.twelveMonths': '12 महीने',
+    'dashboard.selectUser': 'जोखिम विश्लेषण देखने के लिए एक उपयोगकर्ता चुनें',
+    'dashboard.chooseUser': 'बाईं ओर की उपयोगकर्ता सूची से चुनें',
+    'dashboard.loadingUsers': 'उपयोगकर्ता लोड हो रहे हैं...',
+    'dashboard.loadingChart': 'चार्ट डेटा लोड हो रहा है...',
+    
+    // Individual Assessment
+    'individual.title1': 'व्यक्तिगत जोखिम',
+    'individual.title2': 'मूल्यांकन',
+    'individual.subtitle': 'व्यक्तिगत उधारकर्ताओं के लिए क्रेडिट जोखिम का विश्लेषण करें',
+    'individual.subtitleHighlight': 'व्यापक व्यवहार डेटा',
+    'individual.subtitleEnd': ' और सटीक जोखिम स्कोरिंग के लिए वैकल्पिक संकेतों का उपयोग करके।',
+    'individual.startAssessment': 'मूल्यांकन शुरू करें',
+    'individual.userRiskAssessment': 'उपयोगकर्ता जोखिम मूल्यांकन',
+    'individual.formDescription': 'रियल-टाइम क्रेडिट जोखिम विश्लेषण करने के लिए उपयोगकर्ता विवरण दर्ज करें। हमारा AI मॉडल व्यवहार पैटर्न का मूल्यांकन करेगा और तत्काल जोखिम स्कोरिंग प्रदान करेगा।',
+    'individual.rechargeFreq': 'रिचार्ज आवृत्ति',
+    'individual.avgRechargeAmt': 'औसत रिचार्ज राशि',
+    'individual.employmentType': 'रोजगार प्रकार',
+    'individual.employed': 'नियोजित',
+    'individual.selfEmployed': 'स्व-नियोजित',
+    'individual.unemployed': 'बेरोजगार',
+    'individual.student': 'छात्र',
+    'individual.retired': 'सेवानिवृत्त',
+    'individual.avgDaysLate': 'औसत देरी के दिन',
+    'individual.paymentDelayRatio': 'भुगतान विलंब अनुपात',
+    'individual.avgPaymentDue': 'औसत देय भुगतान',
+    'individual.paymentToDueRatio': 'भुगतान से देय अनुपात',
+    'individual.avgOrderValue': 'औसत ऑर्डर मूल्य',
+    'individual.returnRate': 'वापसी दर',
+    'individual.monthsActive': 'सक्रिय महीने',
+    'individual.geoVariance': 'भौगोलिक विचरण स्कोर',
+    'individual.calculateRisk': 'जोखिम स्कोर की गणना करें',
+    'individual.calculating': 'जोखिम स्कोर की गणना हो रही है...',
+    'individual.assessmentHistory': 'मूल्यांकन इतिहास',
+    'individual.historyDescription': 'पिछले व्यक्तिगत जोखिम मूल्यांकन देखें और प्रबंधित करें।',
+    'individual.downloadExcel': 'Excel डाउनलोड करें',
+    'individual.noAssessments': 'कोई मूल्यांकन नहीं मिला। ऊपर अपना पहला व्यक्तिगत मूल्यांकन बनाकर शुरू करें।',
+    'individual.riskScore': 'जोखिम स्कोर',
+    'individual.riskCategory': 'जोखिम श्रेणी',
+    'individual.timestamp': 'समय चिह्न',
+    'individual.required': 'आवश्यक है',
+    'individual.selectEmployment': 'रोजगार प्रकार चुनें',
+    
+    // Synthetic Data
+    'synthetic.title1': 'सिंथेटिक डेटा',
+    'synthetic.title2': 'जेनरेटर',
+    'synthetic.subtitle': 'लापता डेटा वाली CSV फ़ाइलें अपलोड करें और खाली कोशिकाओं को स्वचालित रूप से भरें',
+    'synthetic.subtitleHighlight': 'संदर्भ के अनुसार उपयुक्त सिंथेटिक मूल्यों',
+    'synthetic.subtitleEnd': ' से परीक्षण और विकास के लिए।',
+    'synthetic.generateData': 'डेटा जेनरेट करें',
+    'synthetic.uploadCSV': 'CSV फ़ाइल अपलोड करें',
+    'synthetic.uploadDescription': 'लापता डेटा के साथ एक CSV या Excel फ़ाइल अपलोड करें। हमारा AI मौजूदा कॉलम पैटर्न के आधार पर खाली कोशिकाओं को बुद्धिमानी से भर देगा।',
+    'synthetic.uploadFile': 'अपनी डेटा फ़ाइल अपलोड करें',
+    'synthetic.supportsFormats': 'CSV और Excel (.xlsx) प्रारूपों का समर्थन करता है',
+    'synthetic.uploadBtn': 'CSV अपलोड करें',
+    'synthetic.processData': 'डेटा संसाधित करें',
+    'synthetic.processing': 'संसाधन हो रहा है...',
+    'synthetic.downloadProcessed': 'संसाधित डेटा डाउनलोड करें',
+    'synthetic.originalData': 'मूल डेटा',
+    'synthetic.processedData': 'संसाधित डेटा',
+    'synthetic.empty': 'खाली',
+    'synthetic.scrollView': 'अधिक देखने के लिए स्क्रॉल करें →↓',
+    
+    // Defaulter Tracking
+    'defaulter.title': 'डिफॉल्टर खोज और ट्रैकिंग',
+    'defaulter.description': 'अपनी CSV अपलोड करें, एक उपयोगकर्ता चुनें, और डिफॉल्ट की संभावना की गणना करें।',
+    'defaulter.realtime': 'रियल-टाइम तैयार',
+    'defaulter.uploadCSV': 'CSV अपलोड करें',
+    'defaulter.loadDemo': 'डेमो डेटा लोड करें',
+    'defaulter.downloadExcel': 'Excel डाउनलोड करें',
+    'defaulter.selectUser': 'उपयोगकर्ता ID चुनें',
+    'defaulter.loadData': 'चुनने के लिए डेटा लोड करें',
+    'defaulter.analyzeRisk': 'जोखिम का विश्लेषण करें',
+    'defaulter.analyzing': 'विश्लेषण हो रहा है...',
+    'defaulter.loadPrompt': 'उनकी जोखिम प्रोफ़ाइल देखने के लिए डेटा लोड करें और एक उपयोगकर्ता चुनें।',
+    'defaulter.riskDashboard': 'जोखिम मूल्यांकन डैशबोर्ड',
+    'defaulter.probabilityDefault': 'डिफॉल्ट की संभावना',
+    'defaulter.keyMarkers': 'प्रमुख व्यवहार मार्कर',
+    'defaulter.paymentDelay': 'भुगतान विलंब अनुपात',
+    'defaulter.cartAbandonment': 'कार्ट परित्याग दर',
+    'defaulter.geoVariance': 'भौगोलिक विचरण स्कोर',
+    
+    // Common
+    'common.risk': 'जोखिम',
+    'common.yes': 'हाँ',
+    'common.no': 'नहीं',
+    'common.cancel': 'रद्द करें',
+    'common.confirm': 'पुष्टि करें',
+    'common.close': 'बंद करें',
+    'common.save': 'सहेजें',
+    'common.delete': 'हटाएं',
+    'common.edit': 'संपादित करें',
+    'common.loading': 'लोड हो रहा है...'
   }
 };
 
